@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Cloud — Premier Social Media Content & Viral Agency</title>
+  <meta name="description" content="Creative Cloud is a premier social media content agency producing viral TikToks, Instagram Reels, aesthetic brand feeds, and high-converting paid ad creative.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Ambient Light Orbs -->
+  <div class="ambient-mesh">
+    <div class="mesh-orb mesh-orb-1"></div>
+    <div class="mesh-orb mesh-orb-2"></div>
+    <div class="mesh-orb mesh-orb-3"></div>
+  </div>
+
+  <!-- Dynamic Ambient Mouse Glow Following Cursor -->
+  <div class="global-mouse-glow"></div>
+
+  <!-- Background Grid Texture -->
+  <div class="bg-grid-overlay"></div>
+
+  <!-- Top Scroll Progress Indicator -->
+  <div class="scroll-progress-bar"></div>
+
+  <!-- Custom Mouse Followers (Desktop) -->
+  <div class="custom-cursor-dot"></div>
+  <div class="custom-cursor-follower">
+    <span class="cursor-badge">WATCH</span>
+  </div>
+
+  <!-- ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-container">
+      <!-- Brand Logo -->
+      <a href="#home" class="brand-logo">
+        <div class="logo-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="bold">Creative</span>
+          <span class="accent">Cloud</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Menu -->
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#home" class="nav-link active">Home</a></li>
+          <li><a href="#services" class="nav-link">Services</a></li>
+          <li><a href="#work" class="nav-link">Portfolio</a></li>
+          <li><a href="#process" class="nav-link">Viral Formula</a></li>
+          <li><a href="#schedule" class="nav-link">Book a Call</a></li>
+          <li><a href="#testimonials" class="nav-link">Reviews</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Direct Phone & Action CTA -->
+      <div class="nav-actions">
+        <a href="tel:+18008452990" class="phone-quick-link" title="Call directly for immediate consultation">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          <span>(800) 845-2990</span>
+        </a>
+        <a href="#schedule" class="magnetic-btn btn-primary">Schedule Call</a>
+        
+        <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Navigation -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <button class="modal-close-btn" id="mobileDrawerClose" style="color: #fff; font-size: 1.5rem;">✕</button>
+    <ul class="mobile-nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#services">What We Do</a></li>
+      <li><a href="#work">Campaign Portfolio</a></li>
+      <li><a href="#process">The Viral Formula</a></li>
+      <li><a href="#schedule">Schedule Meeting</a></li>
+      <li><a href="#testimonials">Client Reviews</a></li>
+      <li><a href="#contact">Direct Contact</a></li>
+    </ul>
+    <a href="tel:+18008452990" class="magnetic-btn btn-glow-phone" style="width: 100%; text-align: center; margin-bottom: 0.75rem;">📞 Call (800) 845-2990</a>
+    <a href="#schedule" class="magnetic-btn btn-primary" style="width: 100%; text-align: center;">Book Strategy Call</a>
+  </div>
+
+  <!-- ==========================================================================
+       HERO SECTION
+       ========================================================================== -->
+  <section class="hero-section" id="home">
+    <canvas id="heroCanvas"></canvas>
+
+    <div class="container hero-layout">
+      <!-- Left Content -->
+      <div class="hero-content-col">
+        <div class="hero-badge-pill reveal">
+          <span class="fire-icon">🔥</span>
+          <span>CREATIVE CLOUD &bull; SOCIAL MEDIA CONTENT AGENCY</span>
+        </div>
+
+        <h1 class="hero-headline reveal">
+          We produce <span class="gradient-title">viral content</span> that turns followers into buyers.
+        </h1>
+
+        <p class="hero-description reveal">
+          Stop getting ignored in the algorithm. We script, shoot, edit, and scale high-retention short-form videos, aesthetic brand feeds, and high-converting paid social ads that dominate TikTok, Instagram, and YouTube.
+        </p>
+
+        <div class="hero-cta-group reveal">
+          <a href="#schedule" class="magnetic-btn btn-primary">
+            <span>Schedule 15-Min Strategy Call</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a href="tel:+18008452990" class="magnetic-btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <span>Call Us Directly</span>
+          </a>
+        </div>
+
+        <!-- Social Media Impact KPIs with Animated Counters -->
+        <div class="hero-kpis reveal">
+          <div class="kpi-item">
+            <h3><span data-counter-target="150" data-counter-suffix="M+">0M+</span></h3>
+            <p>Organic Views Generated</p>
+          </div>
+          <div class="kpi-item">
+            <h3><span data-counter-target="3.8" data-counter-suffix="x">0x</span></h3>
+            <p>Avg Engagement Rate</p>
+          </div>
+          <div class="kpi-item">
+            <h3><span data-counter-target="250" data-counter-suffix="+">0+</span></h3>
+            <p>Viral Campaigns Run</p>
+          </div>
+          <div class="kpi-item">
+            <h3><span data-counter-target="48" data-counter-suffix="h">0h</span></h3>
+            <p>Turnaround Speed</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Content: Interactive 3D Social Media Hub Mockup -->
+      <div class="hero-visual reveal" data-tilt data-tilt-max="12">
+        <!-- Floating Satellite Badge 1 (Parallax Float) -->
+        <div class="floating-social-pill pill-float-1 parallax-float" data-speed="0.08">
+          <div style="font-size: 1.4rem;">🔥</div>
+          <div>
+            <div style="font-size: 0.82rem; font-weight: 800; color: #fff;">Viral Hook: +84% Retention</div>
+            <div style="font-size: 0.7rem; color: #94a3b8;">Average 3-Second Hold Rate</div>
+          </div>
+        </div>
+
+        <!-- Floating Satellite Badge 2 (Parallax Float) -->
+        <div class="floating-social-pill pill-float-2 parallax-float" data-speed="0.06">
+          <div style="font-size: 1.4rem;">📈</div>
+          <div>
+            <div style="font-size: 0.82rem; font-weight: 800; color: #fff;">+340% Follower Surge</div>
+            <div style="font-size: 0.7rem; color: #34d399;">TikTok Shop & Instagram Reels</div>
+          </div>
+        </div>
+
+        <!-- Main Social Media Analytics Window -->
+        <div class="social-mockup-main spotlight-card">
+          <div class="mockup-header-row">
+            <div class="channel-pill-group">
+              <span class="channel-pill active" title="TikTok">TT</span>
+              <span class="channel-pill" title="Instagram">IG</span>
+              <span class="channel-pill" title="YouTube Shorts">YT</span>
+              <span class="channel-pill" title="LinkedIn">LI</span>
+            </div>
+            <div class="live-broadcasting">
+              <span class="live-indicator-dot"></span>
+              <span>Live Algorithm Telemetry</span>
+            </div>
+          </div>
+
+          <!-- Featured Viral Reel Preview -->
+          <div class="reel-preview-card">
+            <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&auto=format&fit=crop&q=80" alt="Viral Video Preview">
+            <div class="reel-overlay-content">
+              <div class="reel-badge-viral">
+                <span>🔥 #1 ON FOR YOU PAGE</span>
+              </div>
+              <div class="reel-stats-bar">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  1.2M Likes
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  48.6k Comments
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  82.1k Shares
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Telemetry Stats -->
+          <div class="telemetry-row">
+            <div class="telemetry-box">
+              <div class="metric-label">30-Day Campaign Reach</div>
+              <div class="metric-value">24,840,210</div>
+              <div class="metric-sub">+342% vs previous period</div>
+            </div>
+            <div class="telemetry-box">
+              <div class="metric-label">Inbound Direct Inquiries</div>
+              <div class="metric-value">1,480 Leads</div>
+              <div class="metric-sub">$320k Tracked Revenue</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SOCIAL MEDIA PLATFORMS & CHANNELS MARQUEE
+       ========================================================================== -->
+  <div class="marquee-section">
+    <div class="marquee-label">Dominating every high-attention social algorithm</div>
+    <div class="marquee-mask">
+      <div class="marquee-track">
+        <div class="marquee-item"><span>✦ TIKTOK VIRAL CREATIVE</span></div>
+        <div class="marquee-item"><span>✦ INSTAGRAM REELS PRODUCTION</span></div>
+        <div class="marquee-item"><span>✦ YOUTUBE SHORTS PACING</span></div>
+        <div class="marquee-item"><span>✦ HIGH-ROAS META & TIKTOK ADS</span></div>
+        <div class="marquee-item"><span>✦ AESTHETIC FEED CURATION</span></div>
+        <div class="marquee-item"><span>✦ PODCAST & INTERVIEW CLIPPING</span></div>
+        <div class="marquee-item"><span>✦ INFLUENCER & CREATOR SEEDING</span></div>
+        <div class="marquee-item"><span>✦ 4K STUDIO CINEMATOGRAPHY</span></div>
+        <!-- Infinite seamless repeat -->
+        <div class="marquee-item"><span>✦ TIKTOK VIRAL CREATIVE</span></div>
+        <div class="marquee-item"><span>✦ INSTAGRAM REELS PRODUCTION</span></div>
+        <div class="marquee-item"><span>✦ YOUTUBE SHORTS PACING</span></div>
+        <div class="marquee-item"><span>✦ HIGH-ROAS META & TIKTOK ADS</span></div>
+        <div class="marquee-item"><span>✦ AESTHETIC FEED CURATION</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       CAPABILITIES / WHAT WE DO
+       ========================================================================== -->
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill-tag reveal">What We Deliver</span>
+        <h2 class="section-title reveal">Built for Attention. <span class="gradient-title">Optimized for Revenue.</span></h2>
+        <p class="section-desc reveal">We don't post generic stock graphics. Every script, hook, visual asset, and sound effect is engineered to stop thumbs and build cult-like brand loyalty.</p>
+      </div>
+
+      <div class="services-grid">
+        <!-- Service 1 -->
+        <div class="service-card spotlight-card reveal stagger-1">
+          <div>
+            <div class="service-icon-box">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+            </div>
+            <h3 class="service-title">Short-Form Video Production</h3>
+            <p class="service-text">End-to-end production of TikToks, Reels, and YouTube Shorts. Cinematic 4K cameras, kinetic typography, viral sound design, and sub-second cut pacing.</p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">TikTok & Reels</span>
+            <span class="service-tag">Kinetic Subs</span>
+            <span class="service-tag">4K Cameras</span>
+          </div>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="service-card spotlight-card reveal stagger-2">
+          <div>
+            <div class="service-icon-box">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </div>
+            <h3 class="service-title">Viral Scriptwriting & Hooks</h3>
+            <p class="service-text">The first 3 seconds dictate everything. We write psychological hooks, storytelling arcs, and trending angle scripts tested across millions of impressions.</p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">3-Sec Hooks</span>
+            <span class="service-tag">Story Arcs</span>
+            <span class="service-tag">Algorithm Pacing</span>
+          </div>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="service-card spotlight-card reveal stagger-3">
+          <div>
+            <div class="service-icon-box">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <h3 class="service-title">Aesthetic Feed & Brand Identity</h3>
+            <p class="service-text">Transform your Instagram into a luxury storefront. Cohesive color grading, typography standards, carousel decks, and custom story highlights.</p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">Grid Curation</span>
+            <span class="service-tag">Carousel Decks</span>
+            <span class="service-tag">Color Grading</span>
+          </div>
+        </div>
+
+        <!-- Service 4 -->
+        <div class="service-card spotlight-card reveal stagger-4">
+          <div>
+            <div class="service-icon-box">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path></svg>
+            </div>
+            <h3 class="service-title">Paid Social UGC Ad Creatives</h3>
+            <p class="service-text">Direct-response user generated content designed specifically to crush ROAS on Meta and TikTok Spark Ads. Authentic, native-looking, and high-converting.</p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">High ROAS</span>
+            <span class="service-tag">Native UGC</span>
+            <span class="service-tag">A/B Testing</span>
+          </div>
+        </div>
+
+        <!-- Service 5 -->
+        <div class="service-card spotlight-card reveal stagger-5">
+          <div>
+            <div class="service-icon-box">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+            </div>
+            <h3 class="service-title">Podcast & Longform Repurposing</h3>
+            <p class="service-text">Turn your webinars, founder interviews, or podcasts into 20+ viral short-form micro-clips per episode with captions, b-roll overlays, and zoom-cuts.</p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">Multi-Platform</span>
+            <span class="service-tag">B-Roll Cutaways</span>
+            <span class="service-tag">Auto-Captions</span>
+          </div>
+        </div>
+
+        <!-- Service 6 -->
+        <div class="service-card spotlight-card reveal stagger-6">
+          <div>
+            <div class="service-icon-box">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <h3 class="service-title">Creator & Influencer Seeding</h3>
+            <p class="service-text">We source, vet, brief, and manage micro and macro creators who genuinely align with your brand, orchestrating synchronized multi-creator viral launches.</p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">Talent Outreach</span>
+            <span class="service-tag">Seeding Kits</span>
+            <span class="service-tag">Brand Deals</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       PORTFOLIO SHOWCASE (UPDATED FOR SOCIAL MEDIA CONTENT AGENCY)
+       ========================================================================== -->
+  <section class="section" id="work" style="background: rgba(10, 14, 23, 0.45);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill-tag reveal">Our Creative Portfolio</span>
+        <h2 class="section-title reveal">Campaigns Launched. <span class="gradient-title">Audiences Captivated.</span></h2>
+        <p class="section-desc reveal">A curated showcase of our recent viral short-form series, transformative brand reboots, and high-converting paid social ad campaigns.</p>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="portfolio-tabs reveal">
+        <button class="tab-btn active" data-filter="all">All Campaigns</button>
+        <button class="tab-btn" data-filter="shortform">Reels & TikTok</button>
+        <button class="tab-btn" data-filter="rebrand">Brand Makeovers</button>
+        <button class="tab-btn" data-filter="paid">Paid Social UGC</button>
+      </div>
+
+      <!-- Projects Grid -->
+      <div class="portfolio-grid">
+        <!-- Campaign 1 -->
+        <div class="project-card reveal stagger-1" data-category="shortform" data-project-id="1">
+          <div class="project-image-wrap">
+            <img class="project-img" src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=900&auto=format&fit=crop&q=80" alt="LuxeAura Skincare Campaign">
+            <div class="project-overlay">
+              <div class="project-metric-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
+                <span>+42.8M Organic Views</span>
+              </div>
+              <div class="project-tags">
+                <span class="project-category-tag" style="color: #fb7185; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">Short-Form &bull; TikTok Shop</span>
+              </div>
+              <h3 class="project-name">LuxeAura Skincare Launch</h3>
+              <p class="project-summary">Aesthetic ASMR textures and direct routine hook storytelling that drove an 8.4x return on ad spend and sold out inventory in 3 weeks.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign 2 -->
+        <div class="project-card reveal stagger-2" data-category="rebrand" data-project-id="2">
+          <div class="project-image-wrap">
+            <img class="project-img" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=900&auto=format&fit=crop&q=80" alt="Volt Energy Drink Campaign">
+            <div class="project-overlay">
+              <div class="project-metric-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>0 to 180k Followers</span>
+              </div>
+              <div class="project-tags">
+                <span class="project-category-tag" style="color: #fb7185; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">Brand Makeover &bull; Streetwear Skits</span>
+              </div>
+              <h3 class="project-name">Volt Energy 60-Day Rebrand</h3>
+              <p class="project-summary">Turned a quiet beverage company into an energetic internet culture staple with dopamine-fueled comedy skits and vibrant aesthetics.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign 3 -->
+        <div class="project-card reveal stagger-3" data-category="paid" data-project-id="3">
+          <div class="project-image-wrap">
+            <img class="project-img" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=900&auto=format&fit=crop&q=80" alt="Kinetix Fitness App">
+            <div class="project-overlay">
+              <div class="project-metric-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>-54% Customer CAC</span>
+              </div>
+              <div class="project-tags">
+                <span class="project-category-tag" style="color: #fb7185; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">Performance UGC &bull; Meta & TikTok</span>
+              </div>
+              <h3 class="project-name">Kinetix Fitness Paid UGC</h3>
+              <p class="project-summary">Engineered 45 modular UGC variations with high-friction problem hooks, scaling client ad spend profitably from $5k/day to $35k/day.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign 4 -->
+        <div class="project-card reveal stagger-4" data-category="shortform" data-project-id="4">
+          <div class="project-image-wrap">
+            <img class="project-img" src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=900&auto=format&fit=crop&q=80" alt="Founders Pod Shorts Series">
+            <div class="project-overlay">
+              <div class="project-metric-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>14.5M Shorts Views</span>
+              </div>
+              <div class="project-tags">
+                <span class="project-category-tag" style="color: #fb7185; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">Podcast Repurposing &bull; YouTube</span>
+              </div>
+              <h3 class="project-name">Founders Pod Viral Series</h3>
+              <p class="project-summary">High-energy sound effects, kinetic subtitles, and micro-edits generated +85,000 new YouTube subscribers in 90 days.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       THE VIRAL FORMULA (PROCESS)
+       ========================================================================== -->
+  <section class="section" id="process">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill-tag reveal">The Viral Formula</span>
+        <h2 class="section-title reveal">How We Turn Ideas Into <span class="gradient-title">Millions of Views</span></h2>
+        <p class="section-desc reveal">We don't rely on luck. Our content sprint engine applies algorithmic science, psychological triggers, and cinematic production.</p>
+      </div>
+
+      <div class="blueprint-grid">
+        <div class="blueprint-card reveal stagger-1">
+          <div class="blueprint-step-num">
+            <span class="num-badge">STEP 01</span>
+            <span>AUDIT & TRENDS</span>
+          </div>
+          <h3 class="blueprint-step-title">Trend Discovery</h3>
+          <p class="blueprint-step-desc">We analyze your niche, reverse-engineer high-retention competitor clips, and identify breakout viral audio and angles.</p>
+        </div>
+
+        <div class="blueprint-card reveal stagger-2">
+          <div class="blueprint-step-num">
+            <span class="num-badge">STEP 02</span>
+            <span>SCRIPT & HOOKS</span>
+          </div>
+          <h3 class="blueprint-step-title">Hook Engineering</h3>
+          <p class="blueprint-step-desc">We craft 3-second visual and auditory patterns designed to destroy scroll inertia and hold viewer attention through to the CTA.</p>
+        </div>
+
+        <div class="blueprint-card reveal stagger-3">
+          <div class="blueprint-step-num">
+            <span class="num-badge">STEP 03</span>
+            <span>CINEMATIC SHOOT</span>
+          </div>
+          <h3 class="blueprint-step-title">High-Res Production</h3>
+          <p class="blueprint-step-desc">Studio cameras, studio lighting, crisp directional audio, or authentic creator-led UGC filming matching current platform trends.</p>
+        </div>
+
+        <div class="blueprint-card reveal stagger-4">
+          <div class="blueprint-step-num">
+            <span class="num-badge">STEP 04</span>
+            <span>EDIT & AMPLIFY</span>
+          </div>
+          <h3 class="blueprint-step-title">Pacing & Publishing</h3>
+          <p class="blueprint-step-desc">Kinetic typography, sound design pops, custom thumbnail creation, and optimal scheduling times for explosive algorithm pickup.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SCHEDULE A MEETING & PHONE CALL SECTION (REPLACED PRICING)
+       ========================================================================== -->
+  <section class="section schedule-section" id="schedule">
+    <div class="container">
+      <div class="schedule-card-wrapper reveal">
+        <!-- Left: Call Benefits & Immediate Phone Contact -->
+        <div class="schedule-info">
+          <span class="section-pill-tag">Discovery Session</span>
+          <h2>Ready to ignite your <span class="gradient-title">social presence</span>?</h2>
+          <p>Book a free 15-minute creative audit. We'll review your current profiles, reveal 3 viral content opportunities you're missing, and outline our custom content plan.</p>
+
+          <!-- Immediate Call Banner -->
+          <div class="instant-call-banner">
+            <div>
+              <div class="subtext">Need immediate answers? Call our studio director:</div>
+              <a href="tel:+18008452990" class="phone-number">📞 +1 (800) 845-2990</a>
+            </div>
+            <a href="tel:+18008452990" class="magnetic-btn btn-glow-phone" style="padding: 0.5rem 1rem; font-size: 0.82rem;">Call Now</a>
+          </div>
+
+          <ul class="booking-checklist">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>100% Free 15-Minute Zoom or Phone Call</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Custom viral content blueprint tailored to your brand</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Review of your competitors' top-performing video hooks</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Zero obligation, strictly high-value strategy</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Right: Interactive Meeting Scheduler Widget -->
+        <div class="scheduler-box">
+          <form id="meetingScheduleForm">
+            <input type="hidden" id="selectedDateInput" value="Mon, Oct 6">
+            <input type="hidden" id="selectedTimeInput" value="2:00 PM">
+
+            <!-- Step 1: Select Day -->
+            <div style="margin-bottom: 1.25rem;">
+              <div class="scheduler-step-label">1. Select Preferred Date</div>
+              <div class="date-slots-grid">
+                <button type="button" class="date-pill-btn selected" data-date="Mon, Oct 6">
+                  <div class="day-name">Mon</div>
+                  <div class="day-date">Oct 6</div>
+                </button>
+                <button type="button" class="date-pill-btn" data-date="Tue, Oct 7">
+                  <div class="day-name">Tue</div>
+                  <div class="day-date">Oct 7</div>
+                </button>
+                <button type="button" class="date-pill-btn" data-date="Wed, Oct 8">
+                  <div class="day-name">Wed</div>
+                  <div class="day-date">Oct 8</div>
+                </button>
+                <button type="button" class="date-pill-btn" data-date="Thu, Oct 9">
+                  <div class="day-name">Thu</div>
+                  <div class="day-date">Oct 9</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Select Time -->
+            <div style="margin-bottom: 1.5rem;">
+              <div class="scheduler-step-label">2. Select Time (EST)</div>
+              <div class="time-slots-grid">
+                <button type="button" class="time-pill-btn" data-time="10:00 AM">10:00 AM</button>
+                <button type="button" class="time-pill-btn" data-time="11:30 AM">11:30 AM</button>
+                <button type="button" class="time-pill-btn selected" data-time="2:00 PM">2:00 PM</button>
+                <button type="button" class="time-pill-btn" data-time="3:30 PM">3:30 PM</button>
+                <button type="button" class="time-pill-btn" data-time="4:45 PM">4:45 PM</button>
+                <button type="button" class="time-pill-btn" data-time="6:00 PM">6:00 PM</button>
+              </div>
+            </div>
+
+            <!-- Step 3: Contact Inputs -->
+            <div class="scheduler-inputs">
+              <input type="text" id="schedName" class="scheduler-input" placeholder="Your Name or Brand" required>
+              <input type="tel" id="schedPhone" class="scheduler-input" placeholder="Phone Number for Call (e.g. +1 555-0192)" required>
+              <input type="email" id="schedEmail" class="scheduler-input" placeholder="Your Email Address" required>
+              <input type="text" id="schedHandle" class="scheduler-input" placeholder="Your Social Handle (e.g. @brand on IG/TikTok)">
+
+              <button type="submit" class="magnetic-btn btn-primary" style="width: 100%; padding: 1rem; margin-top: 0.5rem;">
+                <span>Confirm Strategy Meeting</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       WALL OF LOVE / CLIENT TESTIMONIALS
+       ========================================================================== -->
+  <section class="section" id="testimonials" style="background: rgba(10, 14, 23, 0.4);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-pill-tag reveal">Client Praise</span>
+        <h2 class="section-title reveal">What Founders Say About <span class="gradient-title">Our Content</span></h2>
+        <p class="section-desc reveal">Real brand results from founders, CMOs, and creators who scaled their attention with Creative Cloud.</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card spotlight-card reveal stagger-1">
+          <div>
+            <div class="stars-row">★★★★★</div>
+            <p class="testimonial-quote">"Before Creative Cloud, we spent thousands on ads with zero traction. Within our first 30 days of short-form videos with them, one Reel hit 3.4M views and generated $82k in direct revenue."</p>
+          </div>
+          <div class="testimonial-author-box">
+            <img class="author-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80" alt="Chloe Davenport">
+            <div>
+              <div class="author-name">Chloe Davenport</div>
+              <div class="author-role">Founder, LuxeAura Beauty</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card spotlight-card reveal stagger-2">
+          <div>
+            <div class="stars-row">★★★★★</div>
+            <p class="testimonial-quote">"Their script hooks are ridiculously effective. They completely revamped our TikTok channel and took us from 2,000 views per post to consistently averaging 300k+ views per video."</p>
+          </div>
+          <div class="testimonial-author-box">
+            <img class="author-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80" alt="Jason Miller">
+            <div>
+              <div class="author-name">Jason Miller</div>
+              <div class="author-role">Head of Growth, Volt Beverages</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card spotlight-card reveal stagger-3">
+          <div>
+            <div class="stars-row">★★★★★</div>
+            <p class="testimonial-quote">"Creative Cloud understands internet culture better than any agency on the planet. They produce at blistering speed, never miss a deadline, and our DMs have been blowing up with inbound leads."</p>
+          </div>
+          <div class="testimonial-author-box">
+            <img class="author-avatar" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80" alt="Amanda Cole">
+            <div>
+              <div class="author-name">Amanda Cole</div>
+              <div class="author-role">CMO, Kinetix App</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       DIRECT CONTACT / INQUIRY
+       ========================================================================== -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="schedule-card-wrapper reveal" style="grid-template-columns: 1fr 1fr;">
+        <div>
+          <span class="section-pill-tag">Direct Line</span>
+          <h2>Let's talk about your <span class="gradient-title">next viral hit</span>.</h2>
+          <p>Reach out directly by phone, email, or drop our team a message. We answer every inquiry within 24 hours.</p>
+
+          <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 2rem;">
+            <a href="tel:+18008452990" style="display: flex; align-items: center; gap: 1rem; color: #fff; text-decoration: none; font-size: 1.05rem; font-weight: 700;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </div>
+              <div>
+                <div style="font-size: 0.76rem; color: var(--text-dim); text-transform: uppercase;">Direct Studio Phone</div>
+                <div>+1 (800) 845-2990</div>
+              </div>
+            </a>
+
+            <a href="mailto:hello@creativecloud.agency" style="display: flex; align-items: center; gap: 1rem; color: #fff; text-decoration: none; font-size: 1.05rem; font-weight: 700;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; color: var(--accent-purple);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </div>
+              <div>
+                <div style="font-size: 0.76rem; color: var(--text-dim); text-transform: uppercase;">General & Press Inquiries</div>
+                <div>hello@creativecloud.agency</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <form onsubmit="event.preventDefault(); alert('🎉 Message sent! A Creative Cloud director will reach back to you shortly.'); this.reset();" style="display: flex; flex-direction: column; gap: 1rem;">
+          <input type="text" class="scheduler-input" placeholder="Your Name" required>
+          <input type="email" class="scheduler-input" placeholder="Email Address" required>
+          <textarea class="scheduler-input" style="height: 120px; resize: vertical;" placeholder="Tell us about your brand and what goals you want to hit on social media..." required></textarea>
+          <button type="submit" class="magnetic-btn btn-primary" style="padding: 0.9rem;">
+            <span>Send Direct Message</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       CASE STUDY DETAIL MODAL
+       ========================================================================== -->
+  <div class="modal-backdrop" id="projectModal">
+    <div class="modal-content-box">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close modal">✕</button>
+      <div style="font-size: 0.78rem; color: #fb7185; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;" id="modalCategory">Campaign Type</div>
+      <h3 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 1rem;" id="modalTitle">Campaign Title</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;" id="modalDesc">Detailed campaign description.</p>
+      
+      <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1.5rem; color: #38bdf8; font-size: 0.88rem;" id="modalMetrics">
+        Metrics here
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;" id="modalStack">
+        <!-- Tactics injected dynamically -->
+      </div>
+
+      <a href="#schedule" class="magnetic-btn btn-primary" onclick="document.getElementById('projectModal').classList.remove('active'); document.body.style.overflow='';" style="width: 100%;">
+        Book Similar Campaign Strategy
+      </a>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#home" class="brand-logo">
+            <div class="logo-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+              </svg>
+            </div>
+            <div class="logo-text">
+              <span class="bold">Creative</span>
+              <span class="accent">Cloud</span>
+            </div>
+          </a>
+          <p>Premier social media content agency producing high-velocity short-form video, aesthetic brand storytelling, and viral paid social campaigns.</p>
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #10b981; margin-top: 1.25rem;">
+            <span class="live-indicator-dot"></span>
+            <span>Available for new brand campaigns &bull; Call (800) 845-2990</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="#services">TikTok & Reels Production</a></li>
+            <li><a href="#services">Viral Hook Scriptwriting</a></li>
+            <li><a href="#services">Aesthetic Feed Curation</a></li>
+            <li><a href="#services">Paid UGC Video Ads</a></li>
+            <li><a href="#services">Podcast Repurposing</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Studio</h4>
+          <ul class="footer-links">
+            <li><a href="#work">Campaign Portfolio</a></li>
+            <li><a href="#process">The Viral Formula</a></li>
+            <li><a href="#schedule">Schedule Discovery Call</a></li>
+            <li><a href="#testimonials">Founder Reviews</a></li>
+            <li><a href="tel:+18008452990">Direct Phone Line</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Stay Ahead</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Get our bi-weekly breakdown of the newest TikTok & Instagram algorithm shifts.</p>
+          <form class="newsletter-box" onsubmit="event.preventDefault(); alert('Subscribed to Social Trends Dispatch!'); this.reset();" style="display: flex; gap: 0.5rem;">
+            <input type="email" class="scheduler-input" style="padding: 0.6rem 0.85rem; font-size: 0.85rem;" placeholder="you@brand.com" required>
+            <button type="submit" class="magnetic-btn btn-primary" style="padding: 0.6rem 1rem;">Join</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 Creative Cloud Agency, LLC. All rights reserved.
+        </div>
+        <div class="footer-socials">
+          <a href="#" class="social-link" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.48 6.3 6.3 0 0 0 1.93-4.57V8.75a8.16 8.16 0 0 0 4.84 1.58V6.88a4.86 4.86 0 0 1-1-.19z"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="YouTube">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
