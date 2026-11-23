@@ -9,40 +9,72 @@ export default function HeroCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let animId: number;
-    let width = (canvas.width = canvas.offsetWidth || window.innerWidth);
-    let height = (canvas.height = canvas.offsetHeight || 600);
+    let isVisible = true;
+    let width = 0;
+    let height = 0;
+
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
 
     const handleResize = () => {
       if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth || window.innerWidth;
-      height = canvas.height = canvas.offsetHeight || 600;
+      width = canvas.offsetWidth || window.innerWidth;
+      height = canvas.offsetHeight || 600;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
     };
 
-    window.addEventListener("resize", handleResize);
+    handleResize();
+    window.addEventListener("resize", handleResize, { passive: true });
 
-    const particleCount = Math.min(width > 768 ? 48 : 22, 60);
+    // Pause canvas when out of viewport to preserve 100% CPU/GPU speed
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisible = entry.isIntersecting;
+          if (isVisible && !animId) {
+            animId = requestAnimationFrame(animateCanvas);
+          }
+        });
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
+
+    const particleCount = Math.min(width > 768 ? 42 : 20, 50);
     const mouse: { x: number | null; y: number | null; radius: number } = {
       x: null,
       y: null,
-      radius: 150,
+      radius: 140,
     };
+
+    let mouseActive = false;
+    let mouseTimeout: ReturnType<typeof setTimeout>;
 
     const handleMouseMove = (e: MouseEvent) => {
       const heroRect = canvas.getBoundingClientRect();
       if (e.clientY <= heroRect.bottom && e.clientY >= heroRect.top) {
         mouse.x = e.clientX - heroRect.left;
         mouse.y = e.clientY - heroRect.top;
+        mouseActive = true;
+        clearTimeout(mouseTimeout);
+        mouseTimeout = setTimeout(() => {
+          mouseActive = false;
+          mouse.x = null;
+          mouse.y = null;
+        }, 2000);
       } else {
         mouse.x = null;
         mouse.y = null;
+        mouseActive = false;
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
     class Particle {
       x: number;
@@ -54,13 +86,13 @@ export default function HeroCanvas() {
       alpha: number;
 
       constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.6;
-        this.vy = (Math.random() - 0.5) * 0.6;
-        this.radius = Math.random() * 2.2 + 1;
+        this.x = Math.random() * (width || window.innerWidth);
+        this.y = Math.random() * (height || 600);
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = Math.random() * 2 + 1;
         this.color = Math.random() > 0.4 ? "rgba(244, 63, 94, " : "rgba(168, 85, 247, ";
-        this.alpha = Math.random() * 0.5 + 0.25;
+        this.alpha = Math.random() * 0.45 + 0.25;
       }
 
       update() {
@@ -70,14 +102,14 @@ export default function HeroCanvas() {
         if (this.x < 0 || this.x > width) this.vx *= -1;
         if (this.y < 0 || this.y > height) this.vy *= -1;
 
-        if (mouse.x !== null && mouse.y !== null) {
+        if (mouseActive && mouse.x !== null && mouse.y !== null) {
           const dx = mouse.x - this.x;
           const dy = mouse.y - this.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < mouse.radius && dist > 0) {
             const force = (mouse.radius - dist) / mouse.radius;
-            this.x -= (dx / dist) * force * 2;
-            this.y -= (dy / dist) * force * 2;
+            this.x -= (dx / dist) * force * 1.8;
+            this.y -= (dy / dist) * force * 1.8;
           }
         }
       }
@@ -96,23 +128,32 @@ export default function HeroCanvas() {
     }
 
     const animateCanvas = () => {
+      if (!isVisible) {
+        animId = 0;
+        return;
+      }
+
       ctx.clearRect(0, 0, width, height);
 
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw(ctx);
+      const pLen = particles.length;
+      for (let i = 0; i < pLen; i++) {
+        const p1 = particles[i];
+        p1.update();
+        p1.draw(ctx);
 
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+        for (let j = i + 1; j < pLen; j++) {
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const distSq = dx * dx + dy * dy;
 
-          if (dist < 115) {
+          if (distSq < 12100) { // 110 * 110
+            const dist = Math.sqrt(distSq);
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(244, 63, 94, ${(1 - dist / 115) * 0.2})`;
-            ctx.lineWidth = 0.8;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(244, 63, 94, ${(1 - dist / 110) * 0.18})`;
+            ctx.lineWidth = 0.75;
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
           }
         }
@@ -125,10 +166,26 @@ export default function HeroCanvas() {
 
     return () => {
       cancelAnimationFrame(animId);
+      clearTimeout(mouseTimeout);
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 
-  return <canvas ref={canvasRef} id="heroCanvas" aria-hidden="true" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      id="heroCanvas"
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        zIndex: 1,
+      }}
+    />
+  );
 }

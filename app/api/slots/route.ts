@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Check production configuration
     if (!isDbConfigured() && !isDev) {
       console.error(
-        "❌ [PROD 503] /api/slots: MONGODB_URI is not configured in production."
+        "❌ [PROD 503] /api/slots: SQLite database is not configured in production."
       );
       return NextResponse.json(
         {

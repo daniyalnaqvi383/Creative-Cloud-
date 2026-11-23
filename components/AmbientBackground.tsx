@@ -16,23 +16,29 @@ export default function AmbientBackground() {
     let targetX = glowX;
     let targetY = glowY;
     let animId: number;
+    let isMoving = false;
 
     const onMouseMove = (e: MouseEvent) => {
       targetX = e.clientX;
       targetY = e.clientY;
+      isMoving = true;
     };
 
     const updateGlow = () => {
-      glowX += (targetX - glowX) * 0.1;
-      glowY += (targetY - glowY) * 0.1;
+      const dx = targetX - glowX;
+      const dy = targetY - glowY;
 
-      if (glow) {
-        glow.style.transform = `translate(${glowX - 300}px, ${glowY - 300}px)`;
+      if (Math.abs(dx) > 0.2 || Math.abs(dy) > 0.2 || isMoving) {
+        glowX += dx * 0.08;
+        glowY += dy * 0.08;
+        glow.style.transform = `translate3d(${glowX - 300}px, ${glowY - 300}px, 0)`;
+        isMoving = false;
       }
+
       animId = requestAnimationFrame(updateGlow);
     };
 
-    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
     animId = requestAnimationFrame(updateGlow);
 
     return () => {

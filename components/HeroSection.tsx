@@ -13,17 +13,18 @@ export default function HeroSection() {
         {/* Left Content */}
         <div className="hero-content-col">
           <div className="hero-badge-pill reveal">
-            <span className="fire-icon">🔥</span>
-            <span>CREATIVE CLOUD &bull; SOCIAL MEDIA CONTENT AGENCY</span>
+            <span className="fire-icon">⚡</span>
+            <span>CREATIVE CLOUD &bull; AI, SOFTWARE &amp; VIRAL MEDIA POWERHOUSE</span>
           </div>
 
           <h1 className="hero-headline reveal">
-            We produce <span className="gradient-title">viral content</span> that turns followers into buyers.
+            We engineer <span className="gradient-title">viral media</span> &amp;{" "}
+            <span className="gradient-title-alt">autonomous AI engines</span> that scale revenue.
           </h1>
 
           <p className="hero-description reveal">
-            Stop getting ignored in the algorithm. We script, shoot, edit, and scale high-retention short-form videos,
-            aesthetic brand feeds, and high-converting paid social ads that dominate TikTok, Instagram, and YouTube.
+            From high-retention short-form video production and performance ad creatives to custom full-stack SaaS,
+            Web3 smart contracts, WhatsApp CRM bots, and Agentic AI swarms — we engineer high-converting digital powerhouses.
           </p>
 
           <div className="hero-cta-group reveal">
@@ -32,7 +33,7 @@ export default function HeroSection() {
                 <polygon points="23 7 16 12 23 17 23 7" />
                 <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
               </svg>
-              <span>Schedule 15-Min Zoom Call</span>
+              <span>Schedule 15-Min Strategy Call</span>
             </a>
             <a
               href="tel:+18022650207"
@@ -46,7 +47,7 @@ export default function HeroSection() {
             </a>
           </div>
 
-          {/* Social Media Impact KPIs with Animated Counters */}
+          {/* Impact KPIs with Animated Counters */}
           <div className="hero-kpis reveal">
             <div className="kpi-item">
               <h3>
@@ -54,7 +55,7 @@ export default function HeroSection() {
                   150M+
                 </span>
               </h3>
-              <p>Organic Views Generated</p>
+              <p>Organic Media Views</p>
             </div>
             <div className="kpi-item">
               <h3>
@@ -62,23 +63,23 @@ export default function HeroSection() {
                   3.8x
                 </span>
               </h3>
-              <p>Avg Engagement Rate</p>
+              <p>Avg ROAS &amp; Engagement</p>
             </div>
             <div className="kpi-item">
               <h3>
-                <span data-counter-target="250" data-counter-suffix="+">
-                  250+
+                <span data-counter-target="99.9" data-counter-suffix="%">
+                  99.9%
                 </span>
               </h3>
-              <p>Viral Campaigns Run</p>
+              <p>AI &amp; System Uptime</p>
             </div>
             <div className="kpi-item">
               <h3>
-                <span data-counter-target="48" data-counter-suffix="h">
-                  48h
+                <span data-counter-target="24" data-counter-suffix="/7">
+                  24/7
                 </span>
               </h3>
-              <p>Turnaround Speed</p>
+              <p>Autonomous Operations</p>
             </div>
           </div>
         </div>

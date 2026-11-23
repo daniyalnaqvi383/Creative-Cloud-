@@ -1,84 +1,90 @@
-import { MongoClient, Db } from "mongodb";
-import { isDbConfigured } from "./env";
+import Database from "better-sqlite3";
+import fs from "fs";
+import path from "path";
 
 declare global {
   // eslint-disable-next-line no-var
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
+  var _sqliteDb: Database.Database | undefined;
   // eslint-disable-next-line no-var
-  var _mongoIndexesEnsured: boolean | undefined;
+  var _sqliteSchemaEnsured: boolean | undefined;
 }
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient> | null = null;
+export function getDbPath(): string {
+  const customPath = process.env.SQLITE_DB_PATH?.trim();
+  if (customPath) {
+    return path.isAbsolute(customPath)
+      ? customPath
+      : path.resolve(process.cwd(), customPath);
+  }
+  return path.resolve(process.cwd(), "data", "creativecloud.db");
+}
 
-export async function getMongoClient(): Promise<MongoClient> {
-  if (!isDbConfigured()) {
-    throw new Error("MONGODB_URI is not configured in environment variables.");
+export function getDb(): Database.Database {
+  if (process.env.NODE_ENV === "development" && global._sqliteDb) {
+    return global._sqliteDb;
   }
 
-  const uri = process.env.MONGODB_URI!.trim();
+  const dbPath = getDbPath();
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  const db = new Database(dbPath);
+
+  // Performance and integrity tuning
+  db.pragma("journal_mode = WAL");
+  db.pragma("foreign_keys = ON");
+  db.pragma("synchronous = NORMAL");
+
+  if (!global._sqliteSchemaEnsured) {
+    setupDatabaseIndexes(db);
+    global._sqliteSchemaEnsured = true;
+  }
 
   if (process.env.NODE_ENV === "development") {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR.
-    if (!global._mongoClientPromise) {
-      client = new MongoClient(uri);
-      global._mongoClientPromise = client.connect();
-    }
-    return global._mongoClientPromise;
-  } else {
-    // In production mode, it's best to not use a global variable.
-    if (!clientPromise) {
-      client = new MongoClient(uri);
-      clientPromise = client.connect();
-    }
-    return clientPromise;
-  }
-}
-
-export async function getDb(): Promise<Db> {
-  const client = await getMongoClient();
-  const dbName = process.env.MONGODB_DB?.trim() || "creativecloud";
-  const db = client.db(dbName);
-
-  // Auto-ensure indexes once per process lifetime
-  if (!global._mongoIndexesEnsured) {
-    setupDatabaseIndexes(db).catch((err) => {
-      console.error("Failed to auto-ensure MongoDB indexes:", err);
-    });
-    global._mongoIndexesEnsured = true;
+    global._sqliteDb = db;
   }
 
   return db;
 }
 
-export async function setupDatabaseIndexes(dbInstance?: Db): Promise<void> {
-  const db = dbInstance || (await getDb());
-  const collection = db.collection("bookings");
+export function setupDatabaseIndexes(dbInstance?: Database.Database): void {
+  const db = dbInstance || getDb();
 
-  console.log("Setting up MongoDB indexes on 'bookings' collection...");
+  console.log("Setting up SQLite schema and indexes for 'bookings'...");
 
-  // 1. UNIQUE { startTime: 1 } for confirmed bookings (prevents double booking)
-  await collection.createIndex(
-    { startTime: 1 },
-    {
-      unique: true,
-      partialFilterExpression: { status: "confirmed" },
-      name: "uniq_confirmed_startTime",
-    }
-  );
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT NOT NULL,
+      social_handle TEXT DEFAULT '',
+      meeting_type TEXT NOT NULL,
+      start_time TEXT NOT NULL,
+      end_time TEXT NOT NULL,
+      client_timezone TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'confirmed',
+      confirmation_email_sent INTEGER NOT NULL DEFAULT 0,
+      admin_email_sent INTEGER NOT NULL DEFAULT 0,
+      start_email_sent INTEGER NOT NULL DEFAULT 0,
+      admin_reminder_sent INTEGER NOT NULL DEFAULT 0,
+      start_email_claimed_at TEXT DEFAULT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
 
-  // 2. Compound index for status and start time lookups
-  await collection.createIndex(
-    { status: 1, startTime: 1 },
-    { name: "idx_status_startTime" }
-  );
+    CREATE UNIQUE INDEX IF NOT EXISTS uniq_confirmed_startTime 
+    ON bookings(start_time) 
+    WHERE status = 'confirmed';
 
-  // 3. Index for cron queries on startEmailSent
-  await collection.createIndex(
-    { status: 1, startEmailSent: 1, startTime: 1 },
-    { name: "idx_cron_start_email" }
-  );
+    CREATE INDEX IF NOT EXISTS idx_status_startTime 
+    ON bookings(status, start_time);
 
-  console.log("✓ MongoDB indexes successfully ensured!");
+    CREATE INDEX IF NOT EXISTS idx_cron_start_email 
+    ON bookings(status, start_email_sent, start_time);
+  `);
+
+  console.log("✓ SQLite schema and indexes successfully initialized!");
 }

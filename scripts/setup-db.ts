@@ -1,61 +1,34 @@
 import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
 
-import { MongoClient } from "mongodb";
+import { getDb, getDbPath, setupDatabaseIndexes } from "../lib/db";
 
 async function main() {
   console.log("\n==================================================");
-  console.log("       CREATIVE CLOUD — DATABASE INDEX SETUP      ");
+  console.log("       CREATIVE CLOUD — SQLITE DATABASE SETUP     ");
   console.log("==================================================\n");
 
-  const uri = process.env.MONGODB_URI?.trim();
-  if (!uri || uri.includes("placeholder")) {
-    console.error("❌ MONGODB_URI is not set in environment variables.");
-    console.error("Please add MONGODB_URI to .env.local before running setup-db.\n");
-    process.exit(1);
-  }
+  const dbPath = getDbPath();
+  console.log(`Database File: ${dbPath}`);
 
-  const dbName = process.env.MONGODB_DB?.trim() || "creativecloud";
-  console.log(`Connecting to MongoDB Atlas (Database: ${dbName})...`);
+  const db = getDb();
+  setupDatabaseIndexes(db);
 
-  const client = new MongoClient(uri);
-  await client.connect();
-  const db = client.db(dbName);
-  const collection = db.collection("bookings");
-
-  console.log("Creating partial unique index on { startTime: 1 } where status == 'confirmed'...");
-  await collection.createIndex(
-    { startTime: 1 },
-    {
-      unique: true,
-      partialFilterExpression: { status: "confirmed" },
-      name: "uniq_confirmed_startTime",
-    }
-  );
-
-  console.log("Creating compound index on { status: 1, startTime: 1 }...");
-  await collection.createIndex(
-    { status: 1, startTime: 1 },
-    { name: "idx_status_startTime" }
-  );
-
-  console.log("Creating cron query index on { status: 1, startEmailSent: 1, startTime: 1 }...");
-  await collection.createIndex(
-    { status: 1, startEmailSent: 1, startTime: 1 },
-    { name: "idx_cron_start_email" }
-  );
-
-  console.log("\nListing active indexes on 'bookings':");
-  const indexes = await collection.indexes();
+  // Check indexes
+  console.log("\nListing active indexes on 'bookings' table:");
+  const indexes = db.prepare(`PRAGMA index_list('bookings')`).all() as Array<{ name: string; unique: number }>;
   for (const idx of indexes) {
-    console.log(` - ${idx.name}: ${JSON.stringify(idx.key)}`);
+    console.log(` - ${idx.name} (unique: ${idx.unique === 1 ? "yes" : "no"})`);
   }
 
-  await client.close();
-  console.log("\n✅ Database indexes configured successfully!\n");
+  // Quick count test
+  const countRow = db.prepare(`SELECT COUNT(*) as count FROM bookings`).get() as { count: number };
+  console.log(`\nCurrent total bookings in database: ${countRow.count}`);
+
+  console.log("\n✅ SQLite database & indexes initialized successfully!\n");
 }
 
 main().catch((err) => {
-  console.error("❌ Error setting up database:", err);
+  console.error("❌ Error setting up SQLite database:", err);
   process.exit(1);
 });

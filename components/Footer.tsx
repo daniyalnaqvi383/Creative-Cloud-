@@ -51,19 +51,22 @@ export default function Footer() {
             <h4>Services</h4>
             <ul className="footer-links">
               <li>
-                <a href="#services">TikTok &amp; Reels Production</a>
+                <a href="#services">Agentic AI &amp; Swarms</a>
               </li>
               <li>
-                <a href="#services">Viral Hook Scriptwriting</a>
+                <a href="#services">Full-Stack Software Dev</a>
               </li>
               <li>
-                <a href="#services">Aesthetic Feed Curation</a>
+                <a href="#services">Blockchain &amp; Web3</a>
+              </li>
+              <li>
+                <a href="#services">WhatsApp &amp; Social Automation</a>
+              </li>
+              <li>
+                <a href="#services">Short-Form Video &amp; Reels</a>
               </li>
               <li>
                 <a href="#services">Paid UGC Video Ads</a>
-              </li>
-              <li>
-                <a href="#services">Podcast Repurposing</a>
               </li>
             </ul>
           </div>

@@ -23,6 +23,7 @@ export function isConfiguredValue(val: string | undefined | null): boolean {
 
 const rawEnv = {
   NODE_ENV: process.env.NODE_ENV || "development",
+  SQLITE_DB_PATH: process.env.SQLITE_DB_PATH || "data/creativecloud.db",
   MONGODB_URI: process.env.MONGODB_URI,
   MONGODB_DB: process.env.MONGODB_DB || "creativecloud",
   GMAIL_USER: process.env.GMAIL_USER,
@@ -39,6 +40,7 @@ const rawEnv = {
 
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  SQLITE_DB_PATH: z.string().default("data/creativecloud.db"),
   MONGODB_URI: z.string().optional(),
   MONGODB_DB: z.string().default("creativecloud"),
   GMAIL_USER: z.string().optional(),
@@ -58,7 +60,8 @@ export const env = envSchema.parse(rawEnv);
 export const isDev = env.NODE_ENV !== "production";
 
 export function isDbConfigured(): boolean {
-  return isConfiguredValue(process.env.MONGODB_URI);
+  // SQLite is a local embedded database, always configured and accessible
+  return true;
 }
 
 export function isEmailConfigured(): boolean {
@@ -83,6 +86,13 @@ export function isAdminConfigured(): boolean {
 export function isCronConfigured(): boolean {
   if (isDev) return true;
   return isConfiguredValue(process.env.CRON_SECRET);
+}
+
+export function getAdminEmail(): string {
+  if (isConfiguredValue(process.env.ADMIN_EMAIL)) {
+    return process.env.ADMIN_EMAIL!.trim();
+  }
+  return "admin@creativecloud.agency";
 }
 
 // Dev fallback values with warnings
@@ -137,9 +147,6 @@ export function getCronSecret(): string {
 
 export function getMissingVars(): { key: string; requiredFor: string }[] {
   const missing: { key: string; requiredFor: string }[] = [];
-  if (!isConfiguredValue(process.env.MONGODB_URI)) {
-    missing.push({ key: "MONGODB_URI", requiredFor: "Production Database Persistence" });
-  }
   if (!isConfiguredValue(process.env.GMAIL_USER)) {
     missing.push({ key: "GMAIL_USER", requiredFor: "Email Dispatch" });
   }

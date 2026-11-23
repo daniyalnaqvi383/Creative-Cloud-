@@ -1,8 +1,8 @@
 import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
 
-import { MongoClient } from "mongodb";
 import nodemailer from "nodemailer";
+import { getDb, getDbPath } from "../lib/db";
 
 async function main() {
   console.log("\n==================================================");
@@ -12,8 +12,7 @@ async function main() {
   const results: { key: string; status: "PASS" | "FAIL" | "WARN"; message: string }[] = [];
 
   const checks = [
-    { key: "MONGODB_URI", label: "MongoDB Connection String" },
-    { key: "MONGODB_DB", label: "MongoDB Database Name (default: creativecloud)" },
+    { key: "SQLITE_DB_PATH", label: "SQLite Database Path (default: data/creativecloud.db)", optional: true },
     { key: "GMAIL_USER", label: "Gmail Address for Outgoing SMTP" },
     { key: "GMAIL_APP_PASSWORD", label: "16-Character Gmail App Password" },
     { key: "EMAIL_FROM_NAME", label: "Sender Display Name" },
@@ -36,6 +35,8 @@ async function main() {
 
     if (isFilled) {
       results.push({ key: item.key, status: "PASS", message: `Configured (${item.label})` });
+    } else if (item.optional) {
+      results.push({ key: item.key, status: "PASS", message: `Defaulting to data/creativecloud.db (${item.label})` });
     } else {
       results.push({ key: item.key, status: "FAIL", message: `Missing / Empty (${item.label})` });
     }
@@ -49,22 +50,16 @@ async function main() {
 
   console.log("\n---------------- LIVE SERVICE CHECKS -------------");
 
-  // 1. Live MongoDB Ping Test
-  const mongoUri = process.env.MONGODB_URI?.trim();
-  if (mongoUri && !mongoUri.includes("placeholder")) {
-    process.stdout.write("⏳ Testing MongoDB Atlas connection... ");
-    try {
-      const client = new MongoClient(mongoUri, { serverSelectionTimeoutMS: 5000 });
-      await client.connect();
-      await client.db().command({ ping: 1 });
-      await client.close();
-      console.log("✅ PASS (Ping successful)");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.log(`❌ FAIL (${msg})`);
-    }
-  } else {
-    console.log("⚠️  MongoDB: Skipped (MONGODB_URI is empty)");
+  // 1. Live SQLite File and Table Test
+  process.stdout.write("⏳ Testing SQLite database connection... ");
+  try {
+    const dbPath = getDbPath();
+    const db = getDb();
+    const result = db.pragma("quick_check") as Array<Record<string, unknown>>;
+    console.log(`✅ PASS (SQLite operational at ${dbPath}, integrity check: ${JSON.stringify(result[0])})`);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.log(`❌ FAIL (${msg})`);
   }
 
   // 2. Live Gmail SMTP Verification Test

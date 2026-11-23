@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     // 1. Check production database availability
     if (!isDbConfigured() && !isDev) {
       console.error(
-        "❌ [PROD 503] /api/book: MONGODB_URI is not configured in production."
+        "❌ [PROD 503] /api/book: SQLite database is not configured in production."
       );
       return NextResponse.json(
         {

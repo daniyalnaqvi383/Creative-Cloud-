@@ -90,7 +90,6 @@ export default function InteractiveEffects() {
     window.addEventListener("scroll", onScrollParallax, { passive: true });
 
     // 5. Scroll Reveals with Progressive Blur
-    const reveals = document.querySelectorAll<HTMLElement>(".reveal");
     const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -101,8 +100,8 @@ export default function InteractiveEffects() {
       },
       { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
     );
-    reveals.forEach((el) => {
-      // Auto-activate on mobile or if already in viewport
+
+    const setupReveal = (el: HTMLElement) => {
       if (window.innerWidth < 768) {
         el.classList.add("active");
       } else {
@@ -112,7 +111,15 @@ export default function InteractiveEffects() {
         }
       }
       revealObserver.observe(el);
+    };
+
+    const reveals = document.querySelectorAll<HTMLElement>(".reveal");
+    reveals.forEach(setupReveal);
+
+    const mutationObserver = new MutationObserver(() => {
+      document.querySelectorAll<HTMLElement>(".reveal:not(.active)").forEach(setupReveal);
     });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
 
     // 6. Live KPI Animated Numerical Counters
     const counters = document.querySelectorAll<HTMLElement>("[data-counter-target]");
@@ -159,6 +166,7 @@ export default function InteractiveEffects() {
       window.removeEventListener("scroll", onScrollParallax);
       cleanups.forEach((fn) => fn());
       revealObserver.disconnect();
+      mutationObserver.disconnect();
       countObserver.disconnect();
     };
   }, []);

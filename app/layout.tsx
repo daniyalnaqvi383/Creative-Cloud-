@@ -111,6 +111,10 @@ export default function RootLayout({
     priceRange: "$$$",
     areaServed: "Global",
     serviceType: [
+      "Agentic AI & Multi-Agent Swarms",
+      "Software Development & Custom SaaS",
+      "Blockchain & Smart Contracts",
+      "WhatsApp & Social Media Automation",
       "Short-Form Video Production",
       "Viral Hook Scriptwriting",
       "Aesthetic Feed Curation",

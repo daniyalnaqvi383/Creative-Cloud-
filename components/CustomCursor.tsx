@@ -31,6 +31,7 @@ export default function CustomCursor() {
     let followerY = mouseY;
     let isVisible = false;
     let animId: number;
+    let isMoving = false;
 
     const onMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
@@ -42,16 +43,22 @@ export default function CustomCursor() {
         isVisible = true;
       }
 
-      dot.style.left = `${mouseX}px`;
-      dot.style.top = `${mouseY}px`;
+      // Hardware accelerated transform instead of top/left layout thrash
+      dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+      isMoving = true;
     };
 
     const renderFollower = () => {
-      followerX += (mouseX - followerX) * 0.18;
-      followerY += (mouseY - followerY) * 0.18;
+      const dx = mouseX - followerX;
+      const dy = mouseY - followerY;
 
-      follower.style.left = `${followerX}px`;
-      follower.style.top = `${followerY}px`;
+      // Only calculate if there's noticeable movement
+      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1 || isMoving) {
+        followerX += dx * 0.2;
+        followerY += dy * 0.2;
+        follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0) translate(-50%, -50%)`;
+        isMoving = false;
+      }
 
       animId = requestAnimationFrame(renderFollower);
     };
@@ -64,8 +71,8 @@ export default function CustomCursor() {
       isVisible = false;
     };
 
-    window.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseleave", onMouseLeave);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    document.addEventListener("mouseleave", onMouseLeave, { passive: true });
 
     // Dynamic hover listeners
     const handleMouseOver = (e: MouseEvent) => {
@@ -75,7 +82,7 @@ export default function CustomCursor() {
       const projectCard = target.closest(".project-card");
       if (projectCard) {
         follower.classList.add("hovering-project");
-        setBadgeText("WATCH");
+        setBadgeText("EXPLORE");
         return;
       } else {
         follower.classList.remove("hovering-project");
@@ -91,7 +98,7 @@ export default function CustomCursor() {
       }
     };
 
-    document.addEventListener("mouseover", handleMouseOver);
+    document.addEventListener("mouseover", handleMouseOver, { passive: true });
 
     return () => {
       cancelAnimationFrame(animId);
@@ -105,8 +112,32 @@ export default function CustomCursor() {
 
   return (
     <>
-      <div ref={dotRef} className="custom-cursor-dot" />
-      <div ref={followerRef} className="custom-cursor-follower">
+      <div
+        ref={dotRef}
+        id="cursor-dot"
+        className="custom-cursor-dot"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          opacity: 0,
+          willChange: "transform",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        ref={followerRef}
+        id="cursor-follower"
+        className="custom-cursor-follower"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          opacity: 0,
+          willChange: "transform",
+          pointerEvents: "none",
+        }}
+      >
         <span className="cursor-badge">{badgeText}</span>
       </div>
     </>

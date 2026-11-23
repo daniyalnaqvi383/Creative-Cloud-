@@ -1,6 +1,5 @@
-import { ObjectId, MongoServerError } from "mongodb";
+import crypto from "crypto";
 import { getDb } from "./db";
-import { isDbConfigured, isDev } from "./env";
 
 export interface Booking {
   _id: string;
@@ -64,42 +63,142 @@ export class SlotAlreadyBookedError extends Error {
   }
 }
 
-// --------------------------------------------------------------------------
-// MONGODB STORE IMPLEMENTATION
-// --------------------------------------------------------------------------
-export class MongoBookingStore implements BookingStore {
-  async createBooking(input: NewBookingInput): Promise<Booking> {
-    const db = await getDb();
-    const collection = db.collection("bookings");
+interface SqliteBookingRow {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  social_handle: string | null;
+  meeting_type: "zoom" | "phone";
+  start_time: string;
+  end_time: string;
+  client_timezone: string;
+  status: "confirmed" | "cancelled" | "completed";
+  confirmation_email_sent: number;
+  admin_email_sent: number;
+  start_email_sent: number;
+  admin_reminder_sent: number;
+  start_email_claimed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
+function mapSqliteRow(row: SqliteBookingRow): Booking {
+  return {
+    _id: row.id,
+    name: row.name,
+    phone: row.phone,
+    email: row.email,
+    socialHandle: row.social_handle || "",
+    meetingType: row.meeting_type,
+    startTime: new Date(row.start_time),
+    endTime: new Date(row.end_time),
+    clientTimezone: row.client_timezone || "America/New_York",
+    status: row.status,
+    confirmationEmailSent: Boolean(row.confirmation_email_sent),
+    adminEmailSent: Boolean(row.admin_email_sent),
+    startEmailSent: Boolean(row.start_email_sent),
+    adminReminderSent: Boolean(row.admin_reminder_sent),
+    startEmailClaimedAt: row.start_email_claimed_at
+      ? new Date(row.start_email_claimed_at)
+      : null,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  };
+}
+
+// --------------------------------------------------------------------------
+// SQLITE STORE IMPLEMENTATION
+// --------------------------------------------------------------------------
+export class SqliteBookingStore implements BookingStore {
+  async createBooking(input: NewBookingInput): Promise<Booking> {
+    const db = getDb();
     const now = new Date();
-    const doc = {
-      name: input.name.trim(),
-      phone: input.phone.trim(),
-      email: input.email.trim().toLowerCase(),
-      socialHandle: (input.socialHandle || "").trim(),
-      meetingType: input.meetingType,
-      startTime: input.startTime,
-      endTime: input.endTime,
-      clientTimezone: input.clientTimezone || "America/New_York",
-      status: "confirmed" as const,
-      confirmationEmailSent: false,
-      adminEmailSent: false,
-      startEmailSent: false,
-      adminReminderSent: false,
-      startEmailClaimedAt: null,
-      createdAt: now,
-      updatedAt: now,
-    };
+    const id = crypto.randomUUID();
+    const startIso = input.startTime.toISOString();
+    const endIso = input.endTime.toISOString();
+    const nowIso = now.toISOString();
+
+    const insertStmt = db.prepare(`
+      INSERT INTO bookings (
+        id,
+        name,
+        phone,
+        email,
+        social_handle,
+        meeting_type,
+        start_time,
+        end_time,
+        client_timezone,
+        status,
+        confirmation_email_sent,
+        admin_email_sent,
+        start_email_sent,
+        admin_reminder_sent,
+        start_email_claimed_at,
+        created_at,
+        updated_at
+      ) VALUES (
+        @id,
+        @name,
+        @phone,
+        @email,
+        @socialHandle,
+        @meetingType,
+        @startTime,
+        @endTime,
+        @clientTimezone,
+        'confirmed',
+        0,
+        0,
+        0,
+        0,
+        NULL,
+        @createdAt,
+        @updatedAt
+      )
+    `);
 
     try {
-      const result = await collection.insertOne(doc);
+      insertStmt.run({
+        id,
+        name: input.name.trim(),
+        phone: input.phone.trim(),
+        email: input.email.trim().toLowerCase(),
+        socialHandle: (input.socialHandle || "").trim(),
+        meetingType: input.meetingType,
+        startTime: startIso,
+        endTime: endIso,
+        clientTimezone: input.clientTimezone || "America/New_York",
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      });
+
       return {
-        ...doc,
-        _id: result.insertedId.toString(),
+        _id: id,
+        name: input.name.trim(),
+        phone: input.phone.trim(),
+        email: input.email.trim().toLowerCase(),
+        socialHandle: (input.socialHandle || "").trim(),
+        meetingType: input.meetingType,
+        startTime: input.startTime,
+        endTime: input.endTime,
+        clientTimezone: input.clientTimezone || "America/New_York",
+        status: "confirmed",
+        confirmationEmailSent: false,
+        adminEmailSent: false,
+        startEmailSent: false,
+        adminReminderSent: false,
+        startEmailClaimedAt: null,
+        createdAt: now,
+        updatedAt: now,
       };
     } catch (err: unknown) {
-      if (err instanceof MongoServerError && err.code === 11000) {
+      const errStr = String(err);
+      if (
+        errStr.includes("UNIQUE constraint failed") ||
+        (err && typeof err === "object" && "code" in err && err.code === "SQLITE_CONSTRAINT_UNIQUE")
+      ) {
         throw new SlotAlreadyBookedError();
       }
       throw err;
@@ -107,88 +206,78 @@ export class MongoBookingStore implements BookingStore {
   }
 
   async getBookingsForRange(startUtc: Date, endUtc: Date): Promise<Booking[]> {
-    const db = await getDb();
-    const docs = await db
-      .collection("bookings")
-      .find({
-        status: "confirmed",
-        startTime: { $gte: startUtc, $lt: endUtc },
-      })
-      .sort({ startTime: 1 })
-      .toArray();
+    const db = getDb();
+    const rows = db
+      .prepare(
+        `SELECT * FROM bookings 
+         WHERE status = 'confirmed' 
+           AND start_time >= ? 
+           AND start_time < ? 
+         ORDER BY start_time ASC`
+      )
+      .all(startUtc.toISOString(), endUtc.toISOString()) as SqliteBookingRow[];
 
-    return docs.map(mapMongoDoc);
+    return rows.map(mapSqliteRow);
   }
 
   async getBookingsByTab(tab: "upcoming" | "completed" | "cancelled"): Promise<Booking[]> {
-    const db = await getDb();
-    const now = new Date();
+    const db = getDb();
+    const nowIso = new Date().toISOString();
 
-    let query: Record<string, unknown> = {};
+    let rows: SqliteBookingRow[] = [];
 
     if (tab === "upcoming") {
-      query = {
-        status: "confirmed",
-        startTime: { $gte: now },
-      };
+      rows = db
+        .prepare(
+          `SELECT * FROM bookings 
+           WHERE status = 'confirmed' AND start_time >= ? 
+           ORDER BY start_time ASC`
+        )
+        .all(nowIso) as SqliteBookingRow[];
     } else if (tab === "completed") {
-      query = {
-        $or: [
-          { status: "completed" },
-          { status: "confirmed", startTime: { $lt: now } },
-        ],
-      };
+      rows = db
+        .prepare(
+          `SELECT * FROM bookings 
+           WHERE status = 'completed' OR (status = 'confirmed' AND start_time < ?) 
+           ORDER BY start_time DESC`
+        )
+        .all(nowIso) as SqliteBookingRow[];
     } else {
-      query = { status: "cancelled" };
+      rows = db
+        .prepare(
+          `SELECT * FROM bookings 
+           WHERE status = 'cancelled' 
+           ORDER BY start_time DESC`
+        )
+        .all() as SqliteBookingRow[];
     }
 
-    const sortOrder = tab === "upcoming" ? 1 : -1;
-
-    const docs = await db
-      .collection("bookings")
-      .find(query)
-      .sort({ startTime: sortOrder })
-      .toArray();
-
-    return docs.map(mapMongoDoc);
+    return rows.map(mapSqliteRow);
   }
 
   async getBookingById(id: string): Promise<Booking | null> {
-    const db = await getDb();
-    let query: Record<string, unknown>;
-    try {
-      query = { _id: new ObjectId(id) };
-    } catch {
-      query = { _id: id };
-    }
-    const doc = await db.collection("bookings").findOne(query);
-    return doc ? mapMongoDoc(doc) : null;
+    const db = getDb();
+    const row = db
+      .prepare(`SELECT * FROM bookings WHERE id = ? LIMIT 1`)
+      .get(id) as SqliteBookingRow | undefined;
+
+    return row ? mapSqliteRow(row) : null;
   }
 
   async updateBookingStatus(
     id: string,
     status: "confirmed" | "cancelled" | "completed"
   ): Promise<Booking | null> {
-    const db = await getDb();
-    let filter: Record<string, unknown>;
-    try {
-      filter = { _id: new ObjectId(id) };
-    } catch {
-      filter = { _id: id };
-    }
+    const db = getDb();
+    const nowIso = new Date().toISOString();
 
-    const result = await db.collection("bookings").findOneAndUpdate(
-      filter,
-      {
-        $set: {
-          status,
-          updatedAt: new Date(),
-        },
-      },
-      { returnDocument: "after" }
+    db.prepare(`UPDATE bookings SET status = ?, updated_at = ? WHERE id = ?`).run(
+      status,
+      nowIso,
+      id
     );
 
-    return result ? mapMongoDoc(result) : null;
+    return this.getBookingById(id);
   }
 
   async updateBookingFlags(
@@ -200,118 +289,113 @@ export class MongoBookingStore implements BookingStore {
       adminReminderSent: boolean;
     }>
   ): Promise<void> {
-    const db = await getDb();
-    let filter: Record<string, unknown>;
-    try {
-      filter = { _id: new ObjectId(id) };
-    } catch {
-      filter = { _id: id };
+    const db = getDb();
+    const sets: string[] = ["updated_at = ?"];
+    const params: (string | number)[] = [new Date().toISOString()];
+
+    if (flags.confirmationEmailSent !== undefined) {
+      sets.push("confirmation_email_sent = ?");
+      params.push(flags.confirmationEmailSent ? 1 : 0);
+    }
+    if (flags.adminEmailSent !== undefined) {
+      sets.push("admin_email_sent = ?");
+      params.push(flags.adminEmailSent ? 1 : 0);
+    }
+    if (flags.startEmailSent !== undefined) {
+      sets.push("start_email_sent = ?");
+      params.push(flags.startEmailSent ? 1 : 0);
+    }
+    if (flags.adminReminderSent !== undefined) {
+      sets.push("admin_reminder_sent = ?");
+      params.push(flags.adminReminderSent ? 1 : 0);
     }
 
-    await db.collection("bookings").updateOne(filter, {
-      $set: {
-        ...flags,
-        updatedAt: new Date(),
-      },
-    });
+    params.push(id);
+    const sql = `UPDATE bookings SET ${sets.join(", ")} WHERE id = ?`;
+    db.prepare(sql).run(...params);
   }
 
   async claimStartEmail(id: string, now: Date): Promise<boolean> {
-    const db = await getDb();
-    let filter: Record<string, unknown>;
-    try {
-      filter = { _id: new ObjectId(id) };
-    } catch {
-      filter = { _id: id };
-    }
+    const db = getDb();
+    const nowIso = now.toISOString();
+    const tenMinutesAgoIso = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
 
-    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+    const result = db
+      .prepare(
+        `UPDATE bookings 
+         SET start_email_claimed_at = ?, updated_at = ? 
+         WHERE id = ? 
+           AND status = 'confirmed' 
+           AND start_email_sent = 0 
+           AND (start_email_claimed_at IS NULL OR start_email_claimed_at < ?)`
+      )
+      .run(nowIso, nowIso, id, tenMinutesAgoIso);
 
-    const result = await db.collection("bookings").findOneAndUpdate(
-      {
-        ...filter,
-        status: "confirmed",
-        startEmailSent: false,
-        $or: [
-          { startEmailClaimedAt: null },
-          { startEmailClaimedAt: { $lt: tenMinutesAgo } }, // Expired lock
-        ],
-      },
-      {
-        $set: {
-          startEmailClaimedAt: now,
-          updatedAt: now,
-        },
-      }
-    );
-
-    return !!result;
+    return result.changes > 0;
   }
 
   async releaseStartEmailClaim(id: string): Promise<void> {
-    const db = await getDb();
-    let filter: Record<string, unknown>;
-    try {
-      filter = { _id: new ObjectId(id) };
-    } catch {
-      filter = { _id: id };
-    }
-
-    await db.collection("bookings").updateOne(filter, {
-      $set: {
-        startEmailClaimedAt: null,
-        updatedAt: new Date(),
-      },
-    });
+    const db = getDb();
+    db.prepare(
+      `UPDATE bookings SET start_email_claimed_at = NULL, updated_at = ? WHERE id = ?`
+    ).run(new Date().toISOString(), id);
   }
 
   async findPendingStartEmails(now: Date): Promise<Booking[]> {
-    const db = await getDb();
-    const thirtyMinsAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    const db = getDb();
+    const nowIso = now.toISOString();
+    const thirtyMinsAgoIso = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
 
-    const docs = await db
-      .collection("bookings")
-      .find({
-        status: "confirmed",
-        startEmailSent: false,
-        startTime: { $lte: now, $gt: thirtyMinsAgo },
-      })
-      .toArray();
+    const rows = db
+      .prepare(
+        `SELECT * FROM bookings 
+         WHERE status = 'confirmed' 
+           AND start_email_sent = 0 
+           AND start_time <= ? 
+           AND start_time > ? 
+         ORDER BY start_time ASC`
+      )
+      .all(nowIso, thirtyMinsAgoIso) as SqliteBookingRow[];
 
-    return docs.map(mapMongoDoc);
+    return rows.map(mapSqliteRow);
   }
 
   async findPendingAdminReminders(now: Date): Promise<Booking[]> {
-    const db = await getDb();
-    // 10 minutes from now +/- 5 minute window
-    const in15Mins = new Date(now.getTime() + 15 * 60 * 1000);
-    const in5Mins = new Date(now.getTime() + 5 * 60 * 1000);
+    const db = getDb();
+    const in15MinsIso = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
+    const in5MinsIso = new Date(now.getTime() + 5 * 60 * 1000).toISOString();
 
-    const docs = await db
-      .collection("bookings")
-      .find({
-        status: "confirmed",
-        adminReminderSent: false,
-        startTime: { $gt: in5Mins, $lte: in15Mins },
-      })
-      .toArray();
+    const rows = db
+      .prepare(
+        `SELECT * FROM bookings 
+         WHERE status = 'confirmed' 
+           AND admin_reminder_sent = 0 
+           AND start_time > ? 
+           AND start_time <= ? 
+         ORDER BY start_time ASC`
+      )
+      .all(in5MinsIso, in15MinsIso) as SqliteBookingRow[];
 
-    return docs.map(mapMongoDoc);
+    return rows.map(mapSqliteRow);
   }
 
   async checkEmailConflict(email: string, startTime: Date): Promise<boolean> {
-    const db = await getDb();
-    const count = await db.collection("bookings").countDocuments({
-      email: email.trim().toLowerCase(),
-      status: "confirmed",
-      startTime,
-    });
-    return count > 0;
+    const db = getDb();
+    const row = db
+      .prepare(
+        `SELECT COUNT(*) as count FROM bookings 
+         WHERE email = ? 
+           AND status = 'confirmed' 
+           AND start_time = ?`
+      )
+      .get(email.trim().toLowerCase(), startTime.toISOString()) as { count: number };
+
+    return (row?.count ?? 0) > 0;
   }
 }
 
 // --------------------------------------------------------------------------
-// IN-MEMORY STORE IMPLEMENTATION (FOR DEV MODE WHEN MONGODB NOT CONFIGURED)
+// IN-MEMORY STORE IMPLEMENTATION (FOR DEV / UNIT TESTING)
 // --------------------------------------------------------------------------
 declare global {
   // eslint-disable-next-line no-var
@@ -327,7 +411,6 @@ export class MemoryBookingStore implements BookingStore {
   }
 
   async createBooking(input: NewBookingInput): Promise<Booking> {
-    // Check double-booking
     const exists = this.store.some(
       (b) =>
         b.status === "confirmed" &&
@@ -360,9 +443,6 @@ export class MemoryBookingStore implements BookingStore {
     };
 
     this.store.push(newBooking);
-    console.log(
-      `[IN-MEMORY STORE] Booking created: ${newBooking.name} (${newBooking.meetingType}) at ${newBooking.startTime.toISOString()}`
-    );
     return newBooking;
   }
 
@@ -482,48 +562,11 @@ export class MemoryBookingStore implements BookingStore {
   }
 }
 
-// Helper to convert Mongo Doc to Booking object
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapMongoDoc(doc: any): Booking {
-  return {
-    _id: doc._id.toString(),
-    name: doc.name,
-    phone: doc.phone,
-    email: doc.email,
-    socialHandle: doc.socialHandle || "",
-    meetingType: doc.meetingType,
-    startTime: doc.startTime instanceof Date ? doc.startTime : new Date(doc.startTime),
-    endTime: doc.endTime instanceof Date ? doc.endTime : new Date(doc.endTime),
-    clientTimezone: doc.clientTimezone || "America/New_York",
-    status: doc.status,
-    confirmationEmailSent: !!doc.confirmationEmailSent,
-    adminEmailSent: !!doc.adminEmailSent,
-    startEmailSent: !!doc.startEmailSent,
-    adminReminderSent: !!doc.adminReminderSent,
-    startEmailClaimedAt: doc.startEmailClaimedAt
-      ? new Date(doc.startEmailClaimedAt)
-      : null,
-    createdAt: doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt),
-    updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt : new Date(doc.updatedAt),
-  };
-}
-
-let warnedMemoryStore = false;
+let sqliteStoreInstance: SqliteBookingStore | null = null;
 
 export function getBookingStore(): BookingStore {
-  if (isDbConfigured()) {
-    return new MongoBookingStore();
+  if (!sqliteStoreInstance) {
+    sqliteStoreInstance = new SqliteBookingStore();
   }
-
-  if (isDev) {
-    if (!warnedMemoryStore) {
-      console.warn(
-        "⚠️ [DEV MODE] MongoDB URI not configured. Using in-memory store for local testing."
-      );
-      warnedMemoryStore = true;
-    }
-    return new MemoryBookingStore();
-  }
-
-  throw new Error("MONGODB_URI is not configured in production.");
+  return sqliteStoreInstance;
 }

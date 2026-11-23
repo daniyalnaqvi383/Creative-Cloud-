@@ -10,31 +10,81 @@ interface SlotItem {
   reason?: string;
 }
 
-interface DateItem {
+interface SelectedDateInfo {
+  isoDate: string;
   day: string;
   date: string;
-  isoDate: string;
+  fullFormatted: string;
+}
+
+// Helper: Calculate today's date in America/New_York (EST) timezone
+function getNyToday() {
+  const now = new Date();
+  const iso = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const [y, m, d] = iso.split("-").map(Number);
+  return {
+    year: y,
+    month: m - 1, // 0-indexed month
+    day: d,
+    iso,
+    midnight: new Date(y, m - 1, d),
+  };
+}
+
+// Helper: Get initial default selectable working day (today if weekday, or next Monday)
+function getInitialSelectableDate(): SelectedDateInfo {
+  const today = getNyToday();
+  const cursor = new Date(today.year, today.month, today.day);
+  // Advance to next working day if currently on weekend (0 = Sun, 6 = Sat)
+  while (cursor.getDay() === 0 || cursor.getDay() === 6) {
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  const y = cursor.getFullYear();
+  const m = String(cursor.getMonth() + 1).padStart(2, "0");
+  const d = String(cursor.getDate()).padStart(2, "0");
+  return {
+    isoDate: `${y}-${m}-${d}`,
+    day: cursor.toLocaleDateString("en-US", { weekday: "short" }),
+    date: cursor.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    fullFormatted: cursor.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }),
+  };
 }
 
 export default function ScheduleSection() {
-  // Generate next 4 business days dynamically
-  const dates: DateItem[] = useMemo(() => {
-    const list: DateItem[] = [];
-    const cursor = new Date();
+  const initialDate = useMemo(() => getInitialSelectableDate(), []);
+  const todayInfo = useMemo(() => getNyToday(), []);
 
-    while (list.length < 4) {
+  const [viewYear, setViewYear] = useState(todayInfo.year);
+  const [viewMonth, setViewMonth] = useState(todayInfo.month);
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  // Generate 5 upcoming business days (Mon-Fri) for default quick selection
+  const quickDates: SelectedDateInfo[] = useMemo(() => {
+    const list: SelectedDateInfo[] = [];
+    const today = getNyToday();
+    const cursor = new Date(today.year, today.month, today.day);
+
+    while (list.length < 5) {
       const dayOfWeek = cursor.getDay();
-      // Skip Saturday (6) and Sunday (0)
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        const day = cursor.toLocaleDateString("en-US", { weekday: "short" });
-        const date = cursor.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        const year = cursor.getFullYear();
-        const month = String(cursor.getMonth() + 1).padStart(2, "0");
-        const dayNum = String(cursor.getDate()).padStart(2, "0");
+        const y = cursor.getFullYear();
+        const m = String(cursor.getMonth() + 1).padStart(2, "0");
+        const d = String(cursor.getDate()).padStart(2, "0");
         list.push({
-          day,
-          date,
-          isoDate: `${year}-${month}-${dayNum}`,
+          isoDate: `${y}-${m}-${d}`,
+          day: cursor.toLocaleDateString("en-US", { weekday: "short" }),
+          date: cursor.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          fullFormatted: cursor.toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }),
         });
       }
       cursor.setDate(cursor.getDate() + 1);
@@ -43,7 +93,7 @@ export default function ScheduleSection() {
   }, []);
 
   const [meetingType, setMeetingType] = useState<"zoom" | "phone">("zoom");
-  const [selectedDate, setSelectedDate] = useState<DateItem>(dates[0]);
+  const [selectedDate, setSelectedDate] = useState<SelectedDateInfo>(initialDate);
   const [slots, setSlots] = useState<SlotItem[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<SlotItem | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -60,6 +110,96 @@ export default function ScheduleSection() {
     handle: "",
     honeypot: "",
   });
+
+  // Navigation bounds: Cannot navigate to past months
+  const canGoPrev =
+    viewYear > todayInfo.year || (viewYear === todayInfo.year && viewMonth > todayInfo.month);
+  const canGoNext =
+    viewYear < todayInfo.year || (viewYear === todayInfo.year && viewMonth < todayInfo.month + 2);
+
+  const handlePrevMonth = () => {
+    if (canGoPrev) {
+      if (viewMonth === 0) {
+        setViewYear((y) => y - 1);
+        setViewMonth(11);
+      } else {
+        setViewMonth((m) => m - 1);
+      }
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (canGoNext) {
+      if (viewMonth === 11) {
+        setViewYear((y) => y + 1);
+        setViewMonth(0);
+      } else {
+        setViewMonth((m) => m + 1);
+      }
+    }
+  };
+
+  const handleJumpToday = () => {
+    const today = getNyToday();
+    setViewYear(today.year);
+    setViewMonth(today.month);
+    setSelectedDate(getInitialSelectableDate());
+  };
+
+  // Calendar days generation for the currently viewed month
+  const calendarData = useMemo(() => {
+    const today = getNyToday();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const firstDayWeekday = new Date(viewYear, viewMonth, 1).getDay(); // 0=Sun .. 6=Sat
+    const leadingBlanks = firstDayWeekday; // Sunday start: 0 blanks for Sunday
+
+    const days: Array<{
+      dayNum: number;
+      isoDate: string;
+      isPast: boolean;
+      isToday: boolean;
+      isWeekend: boolean;
+      isOutsideWindow: boolean;
+      isDisabled: boolean;
+      dateObj: Date;
+    }> = [];
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(viewYear, viewMonth, d);
+      const isPast = dateObj < today.midnight; // GUZRI HUI DATES -> DISABLED
+      const isToday =
+        viewYear === today.year && viewMonth === today.month && d === today.day;
+      const weekday = dateObj.getDay();
+      const isWeekend = weekday === 0 || weekday === 6;
+      const diffDays = Math.round(
+        (dateObj.getTime() - today.midnight.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const isOutsideWindow = diffDays > 14;
+      const isDisabled = isPast || isWeekend || isOutsideWindow;
+
+      const mStr = String(viewMonth + 1).padStart(2, "0");
+      const dStr = String(d).padStart(2, "0");
+      const isoDate = `${viewYear}-${mStr}-${dStr}`;
+
+      days.push({
+        dayNum: d,
+        isoDate,
+        isPast,
+        isToday,
+        isWeekend,
+        isOutsideWindow,
+        isDisabled,
+        dateObj,
+      });
+    }
+
+    const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+
+    return { leadingBlanks, days, monthLabel };
+  }, [viewYear, viewMonth]);
 
   // Fetch real-time available slots for selected date
   const fetchSlots = useCallback(async (dateIso: string) => {
@@ -95,6 +235,23 @@ export default function ScheduleSection() {
     }
   }, [selectedDate, fetchSlots]);
 
+  const handleSelectDay = (item: (typeof calendarData.days)[0]) => {
+    if (item.isDisabled) return;
+    setSelectedDate({
+      isoDate: item.isoDate,
+      day: item.dateObj.toLocaleDateString("en-US", { weekday: "short" }),
+      date: item.dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      fullFormatted: item.dateObj.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    });
+    setSelectedSlot(null);
+    setSubmitError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSlot) {
@@ -124,12 +281,10 @@ export default function ScheduleSection() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        // If slot was taken by someone else concurrently
         if (res.status === 409 || data.slotTaken) {
           setSubmitError(
             data.error || "This time slot was just reserved by another client. Please pick another time."
           );
-          // Refresh slots to show accurate availability
           fetchSlots(selectedDate.isoDate);
           return;
         }
@@ -142,7 +297,7 @@ export default function ScheduleSection() {
 
       setTimeout(() => {
         alert(
-          `🎉 ${typeLabel} Confirmed!\n\nHey ${formData.name || "Friend"}, your 15-minute social media growth audit is scheduled for ${selectedDate.day}, ${selectedDate.date} at ${selectedSlot.time}.\n\n${
+          `🎉 ${typeLabel} Confirmed!\n\nHey ${formData.name || "Friend"}, your 15-minute social media growth audit is scheduled for ${selectedDate.fullFormatted} at ${selectedSlot.time}.\n\n${
             meetingType === "zoom"
               ? "A calendar invite (.ics) has been dispatched to " + (formData.email || "your email") + ". Direct Zoom link will arrive right at start time!"
               : "Our creative director will call you at " + (formData.phone || "+1 (802) 265-0207") + "."
@@ -150,7 +305,6 @@ export default function ScheduleSection() {
         );
         setFormData({ name: "", phone: "", email: "", handle: "", honeypot: "" });
         setConfirmed(false);
-        // Refresh slots for updated state
         fetchSlots(selectedDate.isoDate);
       }, 700);
     } catch (err: unknown) {
@@ -225,7 +379,7 @@ export default function ScheduleSection() {
             {/* Step 1: Meeting Format Selector (Zoom vs Phone) */}
             <div style={{ marginBottom: "1.25rem" }}>
               <div className="scheduler-step-label">1. Choose Meeting Platform</div>
-              <div className="platform-selector-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.85rem", width: "100%" }}>
+              <div className="platform-selector-grid">
                 <button
                   type="button"
                   onClick={() => setMeetingType("zoom")}
@@ -303,47 +457,241 @@ export default function ScheduleSection() {
                 autoComplete="off"
               />
 
-              {/* Step 2: Select Day */}
-              <div style={{ marginBottom: "1.25rem" }}>
-                <div className="scheduler-step-label">2. Select Preferred Date</div>
+              {/* Step 2: Date Selector (5 Quick Date Pills + Expandable Calendar) */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "0.75rem",
+                    flexWrap: "wrap",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <div className="scheduler-step-label" style={{ marginBottom: 0 }}>
+                    2. Select Preferred Date
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCalendar((prev) => !prev)}
+                    className={`btn-toggle-calendar ${showCalendar ? "active" : ""}`}
+                    aria-expanded={showCalendar}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>{showCalendar ? "✕ Close Calendar" : "📅 Pick From Calendar"}</span>
+                  </button>
+                </div>
+
+                {/* 5 Quick Upcoming Dates (Always visible by default: "pehle wese hi 5 dates or slots") */}
                 <div className="date-slots-grid">
-                  {dates.map((d, idx) => {
-                    const isSelected = selectedDate.isoDate === d.isoDate;
+                  {quickDates.map((item) => {
+                    const isSelected = selectedDate.isoDate === item.isoDate;
                     return (
                       <button
-                        key={idx}
+                        key={item.isoDate}
                         type="button"
+                        onClick={() => {
+                          setSelectedDate(item);
+                          setSelectedSlot(null);
+                        }}
                         className={`date-pill-btn ${isSelected ? "selected" : ""}`}
-                        onClick={() => setSelectedDate(d)}
                       >
-                        <div className="day-name">{d.day}</div>
-                        <div className="day-date">{d.date}</div>
+                        <span className="day-name">{item.day}</span>
+                        <span className="day-date">{item.date}</span>
                       </button>
                     );
                   })}
                 </div>
+
+                {/* Custom Date Notice (if user picked a date beyond the 5 quick pills) */}
+                {!quickDates.some((q) => q.isoDate === selectedDate.isoDate) && (
+                  <div
+                    style={{
+                      marginTop: "0.6rem",
+                      padding: "0.45rem 0.8rem",
+                      background: "rgba(16, 185, 129, 0.12)",
+                      border: "1px solid rgba(16, 185, 129, 0.35)",
+                      borderRadius: "8px",
+                      fontSize: "0.82rem",
+                      color: "#34d399",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <span>
+                      📅 Custom Date Selected: <strong>{selectedDate.fullFormatted}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedDate(quickDates[0]);
+                        setSelectedSlot(null);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#94a3b8",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Reset to Quick Dates
+                    </button>
+                  </div>
+                )}
+
+                {/* Interactive Month Calendar Widget (toggled via button) */}
+                {showCalendar && (
+                  <div className="calendar-widget" style={{ marginTop: "0.85rem" }}>
+                    {/* Calendar Month & Navigation Controls */}
+                    <div className="calendar-header">
+                      <div className="calendar-month-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <span>{calendarData.monthLabel}</span>
+                      </div>
+
+                      <div className="calendar-nav-controls">
+                        {canGoPrev && (
+                          <button
+                            type="button"
+                            className="calendar-today-btn"
+                            onClick={handleJumpToday}
+                            title="Return to current month"
+                          >
+                            Today
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="calendar-nav-btn"
+                          onClick={handlePrevMonth}
+                          disabled={!canGoPrev}
+                          title={canGoPrev ? "Previous Month" : "Cannot navigate to past months"}
+                          aria-label="Previous Month"
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="15 18 9 12 15 6" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          className="calendar-nav-btn"
+                          onClick={handleNextMonth}
+                          disabled={!canGoNext}
+                          title={canGoNext ? "Next Month" : "Booking window limit"}
+                          aria-label="Next Month"
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Weekday Row */}
+                    <div className="calendar-weekdays">
+                      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dayName, idx) => (
+                        <div
+                          key={dayName}
+                          className={`calendar-weekday-col ${idx === 0 || idx === 6 ? "weekend" : ""}`}
+                        >
+                          {dayName}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Days Grid */}
+                    <div className="calendar-days-grid">
+                      {/* Empty placeholder cells for month starting weekday */}
+                      {Array.from({ length: calendarData.leadingBlanks }).map((_, idx) => (
+                        <div key={`blank-${idx}`} className="calendar-day-empty" aria-hidden="true" />
+                      ))}
+
+                      {/* Day Cells */}
+                      {calendarData.days.map((item) => {
+                        const isSelected = selectedDate.isoDate === item.isoDate;
+                        return (
+                          <button
+                            key={item.isoDate}
+                            type="button"
+                            disabled={item.isDisabled}
+                            onClick={() => handleSelectDay(item)}
+                            className={`calendar-day-btn ${isSelected ? "selected" : ""} ${
+                              item.isToday ? "today" : ""
+                            } ${item.isDisabled ? "disabled" : ""} ${
+                              item.isWeekend ? "weekend" : ""
+                            }`}
+                            title={
+                              item.isPast
+                                ? "Past date cannot be selected"
+                                : item.isWeekend
+                                ? "Agency closed on weekends"
+                                : item.isOutsideWindow
+                                ? "Booking window is up to 14 days in advance"
+                                : item.isToday
+                                ? "Today — Available for booking"
+                                : `Select ${item.dateObj.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`
+                            }
+                            aria-label={item.dateObj.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                          >
+                            <span>{item.dayNum}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selected Date Summary Banner */}
+                    <div className="calendar-selected-summary">
+                      <div className="date-text">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>Selected: <strong>{selectedDate.fullFormatted}</strong></span>
+                      </div>
+                      <span className="status-badge">Available • 15-Min Slot</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Step 3: Select Time */}
               <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.4rem" }}>
                   <div className="scheduler-step-label" style={{ marginBottom: 0 }}>
-                    3. Select Time (EST)
+                    3. Select Time for {selectedDate.day}, {selectedDate.date} (EST)
                   </div>
                   {loadingSlots && (
-                    <span style={{ fontSize: "0.75rem", color: "var(--primary)" }}>
-                      Checking slots...
+                    <span style={{ fontSize: "0.75rem", color: "var(--primary)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                      <svg style={{ animation: "spin 1s linear infinite" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                        <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                      </svg>
+                      <span>Checking slots...</span>
                     </span>
                   )}
                 </div>
 
                 {slotsError ? (
-                  <div style={{ fontSize: "0.8rem", color: "#fb7185", padding: "0.5rem", background: "rgba(244,63,94,0.1)", borderRadius: "8px" }}>
-                    {slotsError}
+                  <div style={{ fontSize: "0.82rem", color: "#fca5a5", padding: "0.65rem 0.9rem", background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "8px" }}>
+                    ⚠️ {slotsError}
                   </div>
                 ) : slots.length === 0 && !loadingSlots ? (
-                  <div style={{ fontSize: "0.8rem", color: "#94a3b8", padding: "0.5rem" }}>
-                    No slots available for this date.
+                  <div style={{ fontSize: "0.84rem", color: "#94a3b8", padding: "0.75rem 1rem", background: "rgba(255, 255, 255, 0.03)", borderRadius: "8px", border: "1px dashed rgba(255, 255, 255, 0.1)" }}>
+                    No slots remaining for this date. Please choose another business day on the calendar above.
                   </div>
                 ) : (
                   <div className="time-slots-grid">
@@ -356,7 +704,7 @@ export default function ScheduleSection() {
                           disabled={!s.available}
                           className={`time-pill-btn ${isSelected ? "selected" : ""}`}
                           style={{
-                            opacity: s.available ? 1 : 0.35,
+                            opacity: s.available ? 1 : 0.3,
                             cursor: s.available ? "pointer" : "not-allowed",
                             textDecoration: s.available ? "none" : "line-through",
                           }}
@@ -417,9 +765,9 @@ export default function ScheduleSection() {
                 {submitError && (
                   <div
                     style={{
-                      background: "rgba(244, 63, 94, 0.15)",
-                      border: "1px solid rgba(244, 63, 94, 0.4)",
-                      color: "#fb7185",
+                      background: "rgba(239, 68, 68, 0.15)",
+                      border: "1px solid rgba(239, 68, 68, 0.4)",
+                      color: "#fca5a5",
                       padding: "0.65rem 0.9rem",
                       borderRadius: "8px",
                       fontSize: "0.82rem",
@@ -437,11 +785,12 @@ export default function ScheduleSection() {
                     width: "100%",
                     padding: "1rem",
                     marginTop: "0.5rem",
+                    color: "#ffffff",
                     background: confirmed
                       ? "#10b981"
                       : meetingType === "zoom"
                       ? "linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #1d4ed8 100%)"
-                      : undefined,
+                      : "linear-gradient(135deg, #059669 0%, #10b981 50%, #00f59b 100%)",
                   }}
                   disabled={submitting || confirmed || !selectedSlot}
                 >

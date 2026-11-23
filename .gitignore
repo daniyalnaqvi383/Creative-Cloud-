@@ -32,3 +32,12 @@ yarn-error.log*
 .vscode
 .idea
 *.log
+
+# SQLite Database Files
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite

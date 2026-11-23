@@ -65,6 +65,36 @@ export default function AnimatedScenesPlayer() {
       metric2Val: "-54%",
       soundText: "Creator Seeding • 45 Variants",
     },
+    {
+      id: 4,
+      label: "04. Agentic AI",
+      tag: "AUTONOMOUS SWARMS",
+      title: "“14 Autonomous AI Agents running 24/7 enterprise workflows”",
+      subtitle: "Multi-agent LangGraph architectures executing research, CRM sync, and auto-scheduling.",
+      badge: "🤖 94% OPS AUTOMATED",
+      badgeColor: "#06b6d4",
+      image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+      metric1Label: "Executions/Mo",
+      metric1Val: "1.2M+",
+      metric2Label: "Human Bottleneck",
+      metric2Val: "0%",
+      soundText: "Custom Tool Calling • Sub-Second",
+    },
+    {
+      id: 5,
+      label: "05. Web3 & SaaS",
+      tag: "FULL-STACK CODE",
+      title: "“Enterprise SaaS & Audited Smart Contracts at scale”",
+      subtitle: "Lightning-fast Next.js portals, DeFi protocol liquidity, and WhatsApp automation bots.",
+      badge: "💎 $140M TVL SECURED",
+      badgeColor: "#f59e0b",
+      image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&auto=format&fit=crop&q=80",
+      metric1Label: "API Response",
+      metric1Val: "<12ms",
+      metric2Label: "Unique Wallets",
+      metric2Val: "62,000+",
+      soundText: "EVM & Solana • Zero Latency",
+    },
   ];
 
   const [activeIdx, setActiveIdx] = useState(0);
@@ -85,8 +115,8 @@ export default function AnimatedScenesPlayer() {
   return (
     <div className="social-mockup-main spotlight-card" style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
       {/* Top Header: Scene Tabs & Live Pulse */}
-      <div className="mockup-header-row" style={{ flexWrap: "wrap", gap: "0.75rem" }}>
-        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+      <div className="mockup-header-row" style={{ flexWrap: "wrap", gap: "0.6rem", paddingBottom: "0.75rem", marginBottom: "0.85rem" }}>
+        <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
           {scenes.map((s, idx) => (
             <button
               key={s.id}
@@ -101,8 +131,8 @@ export default function AnimatedScenesPlayer() {
                 border: "1px solid",
                 borderColor: activeIdx === idx ? "var(--primary)" : "rgba(255, 255, 255, 0.12)",
                 borderRadius: "var(--radius-full)",
-                padding: "0.3rem 0.75rem",
-                fontSize: "0.75rem",
+                padding: "0.22rem 0.6rem",
+                fontSize: "0.72rem",
                 fontWeight: 700,
                 cursor: "pointer",
                 transition: "all 0.25s ease",
@@ -114,7 +144,7 @@ export default function AnimatedScenesPlayer() {
           ))}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", marginLeft: "auto" }}>
           <button
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
@@ -124,8 +154,8 @@ export default function AnimatedScenesPlayer() {
               border: "1px solid rgba(255, 255, 255, 0.15)",
               color: "#cbd5e1",
               borderRadius: "6px",
-              padding: "0.2rem 0.5rem",
-              fontSize: "0.7rem",
+              padding: "0.18rem 0.45rem",
+              fontSize: "0.68rem",
               cursor: "pointer",
             }}
           >
@@ -134,7 +164,7 @@ export default function AnimatedScenesPlayer() {
 
           <div className="live-broadcasting">
             <span className="live-indicator-dot" />
-            <span>Scene Active</span>
+            <span style={{ fontSize: "0.68rem" }}>Active</span>
           </div>
         </div>
       </div>
@@ -143,13 +173,14 @@ export default function AnimatedScenesPlayer() {
       <div
         className="reel-preview-card"
         style={{
-          height: "230px",
+          height: "200px",
           position: "relative",
           overflow: "hidden",
           borderRadius: "var(--radius-md)",
           border: "1px solid rgba(255, 255, 255, 0.15)",
           width: "100%",
           boxSizing: "border-box",
+          marginBottom: "0.85rem",
         }}
       >
         <img
@@ -265,22 +296,22 @@ export default function AnimatedScenesPlayer() {
       </div>
 
       {/* Dynamic Telemetry Row Matching Active Scene */}
-      <div className="telemetry-row" style={{ marginTop: "1rem" }}>
-        <div className="telemetry-box">
+      <div className="telemetry-row" style={{ marginTop: "0.75rem" }}>
+        <div className="telemetry-box" style={{ padding: "0.65rem 0.8rem" }}>
           <div className="metric-label">{currentScene.metric1Label}</div>
-          <div className="metric-value" style={{ color: "#fff" }}>
+          <div className="metric-value" style={{ color: "#fff", fontSize: "1.1rem" }}>
             {currentScene.metric1Val}
           </div>
-          <div className="metric-sub" style={{ color: "#34d399" }}>
+          <div className="metric-sub" style={{ color: "#34d399", fontSize: "0.68rem" }}>
             +342% vs organic benchmark
           </div>
         </div>
-        <div className="telemetry-box">
+        <div className="telemetry-box" style={{ padding: "0.65rem 0.8rem" }}>
           <div className="metric-label">{currentScene.metric2Label}</div>
-          <div className="metric-value" style={{ color: "#38bdf8" }}>
+          <div className="metric-value" style={{ color: "#38bdf8", fontSize: "1.1rem" }}>
             {currentScene.metric2Val}
           </div>
-          <div className="metric-sub" style={{ color: "#a855f7" }}>
+          <div className="metric-sub" style={{ color: "#a855f7", fontSize: "0.68rem" }}>
             Direct algorithmic pickup
           </div>
         </div>
@@ -293,7 +324,7 @@ export default function AnimatedScenesPlayer() {
           height: "2px",
           background: "rgba(255, 255, 255, 0.08)",
           borderRadius: "2px",
-          marginTop: "1rem",
+          marginTop: "0.75rem",
           overflow: "hidden",
         }}
       >

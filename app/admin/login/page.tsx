@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState("admin@creativecloud.agency");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -26,7 +27,7 @@ export default function AdminLoginPage() {
         throw new Error(data.error || "Login failed");
       }
 
-      router.push("/admin");
+      router.push("/admin/meetings");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid credentials");
     } finally {
@@ -95,6 +96,42 @@ export default function AdminLoginPage() {
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           <div>
             <label
+              htmlFor="admin-email"
+              style={{
+                display: "block",
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                color: "#cbd5e1",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                marginBottom: "0.5rem",
+              }}
+            >
+              Admin Email
+            </label>
+            <input
+              id="admin-email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@creativecloud.agency"
+              style={{
+                width: "100%",
+                padding: "0.85rem 1rem",
+                background: "rgba(0, 0, 0, 0.5)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                borderRadius: "10px",
+                color: "#fff",
+                fontSize: "0.95rem",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+
+          <div>
+            <label
               htmlFor="admin-password"
               style={{
                 display: "block",
@@ -106,7 +143,7 @@ export default function AdminLoginPage() {
                 marginBottom: "0.5rem",
               }}
             >
-              Master Password
+              Admin Password
             </label>
             <input
               id="admin-password"
@@ -114,7 +151,7 @@ export default function AdminLoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter master password..."
+              placeholder="Enter admin password..."
               style={{
                 width: "100%",
                 padding: "0.85rem 1rem",
@@ -152,14 +189,19 @@ export default function AdminLoginPage() {
         <div
           style={{
             marginTop: "1.75rem",
-            paddingTop: "1.25rem",
-            borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+            padding: "1rem",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "12px",
             textAlign: "center",
             fontSize: "0.78rem",
-            color: "#64748b",
+            color: "#94a3b8",
+            lineHeight: 1.6,
           }}
         >
-          Dev hint: If <code>ADMIN_PASSWORD</code> is empty in local dev, use password <code>admin123</code>.
+          <div style={{ fontWeight: 700, color: "#cbd5e1", marginBottom: "0.2rem" }}>🔑 Default Admin Access:</div>
+          <div>Email: <code style={{ color: "#38bdf8" }}>admin@creativecloud.agency</code></div>
+          <div>Password: <code style={{ color: "#34d399" }}>admin12345</code></div>
         </div>
       </div>
     </div>
